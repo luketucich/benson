@@ -2,6 +2,16 @@
 
 Benson is a desktop app for saving a quick thought without leaving what you are working on. Record a voice note, review what Benson understood, and send it to Obsidian. The full scope is in the [MVP plan](docs/mvp-plan.md).
 
+## Running the App
+
+Needs Node 20 or newer.
+
+```
+cd app
+npm install
+npm run dev
+```
+
 ## Documents
 
 - [MVP plan](docs/mvp-plan.md)
