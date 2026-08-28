@@ -1,7 +1,19 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, Tray, Menu, nativeImage } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import trayIcon from '../../resources/trayTemplate.png?asset'
+
+// Kept at module scope so the tray is not garbage collected.
+let tray: Tray | null = null
+
+function createTray(): void {
+  tray = new Tray(nativeImage.createFromPath(trayIcon))
+  tray.setToolTip('Benson')
+
+  const menu = Menu.buildFromTemplate([{ label: 'Quit Benson', role: 'quit' }])
+  tray.on('right-click', () => tray?.popUpContextMenu(menu))
+}
 
 function createWindow(): void {
   // Create the browser window.
@@ -49,6 +61,7 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  createTray()
   createWindow()
 
   app.on('activate', function () {
