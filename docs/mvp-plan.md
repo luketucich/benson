@@ -20,6 +20,7 @@ The MVP is finished when all six steps work end to end.
 
 - A small menu bar app for Mac
 - A **Record** button
+- A hotkey to start and stop recording
 - An editable transcript and note preview
 - A **Send to Obsidian** button
 - A simple history list

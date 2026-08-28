@@ -32,7 +32,7 @@ If a Wednesday falls during travel or a university break, the meeting gets moved
 | September 5-11 | Add Parakeet transcription, SQLite storage, and a simple history list. |
 | September 12-18 | Build the review form and test sending a note through the Obsidian MCP. |
 | September 19-25 | Add Qwen and have it prepare an Obsidian note for review. |
-| September 26-October 2 | Connect the full flow, test it, and finish the MVP. |
+| September 26-October 2 | Connect the full flow, add the recording hotkey, test it, and finish the MVP. |
 | October 3-9 | Catch up on anything unfinished and write up the MVP before the Korea trip. |
 | October 10-16 | No project work planned. Korea trip and UNC Charlotte fall break (October 12-13). |
 | October 17-23 | Fix anything noticed after the break and try creating a reviewed Google Calendar event. Save it for later if it takes too long. |
