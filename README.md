@@ -2,29 +2,15 @@
 
 Benson is a desktop app for saving a quick thought without leaving what you are working on. Record a voice note, review what Benson understood, and send it to Obsidian. The full scope is in the [MVP plan](docs/mvp-plan.md).
 
-## Running the App
-
-Needs Node 20 or newer.
-
-```
-cd app
-npm install
-npm run dev
-```
-
 ## Documents
 
 - [MVP plan](docs/mvp-plan.md)
-- [Weekly updates](docs/weekly-updates/) (one file per week, plus the [template](docs/weekly-updates/template.md))
-- [Meeting notes](docs/meeting-notes/) (one file per meeting)
+- [Weekly updates](docs/weekly-updates/)
+- [Meeting notes](docs/meeting-notes/)
 
 ## Timeline
 
 The goal is to finish the full MVP by **Friday, October 2, 2026**. Weekly meetings with my professor happen on Wednesdays, and a weekly update goes out every Friday.
-
-The first row is a little longer because it starts after the August 26 meeting and ends with the September 4 update. After that, each row runs from Saturday through Friday.
-
-If a Wednesday falls during travel or a university break, the meeting gets moved ahead of time.
 
 | Week | Main goal |
 | --- | --- |
