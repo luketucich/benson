@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 function App(): React.JSX.Element {
   const [recording, setRecording] = useState(false)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [savedPath, setSavedPath] = useState<string | null>(null)
 
   // The recorder lives here so it survives between renders.
   const recorderRef = useRef<MediaRecorder | null>(null)
@@ -17,11 +18,17 @@ function App(): React.JSX.Element {
     recorder.ondataavailable = (event) => chunks.push(event.data)
 
     // Once stopped, combine the pieces into one clip and hand it to the player.
-    recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'audio/webm' })
-      setAudioUrl(URL.createObjectURL(blob))
+    recorder.onstop = async () => {
       // Turn the mic off now that we are done with it.
       mic.getTracks().forEach((track) => track.stop())
+
+      const blob = new Blob(chunks, { type: 'audio/webm' })
+      setAudioUrl(URL.createObjectURL(blob))
+
+      // Save the clip to disk and remember where it went.
+      const bytes = await blob.arrayBuffer()
+      const path = await window.api.saveRecording(bytes)
+      setSavedPath(path)
     }
 
     recorder.start()
@@ -45,6 +52,7 @@ function App(): React.JSX.Element {
           <audio controls src={audioUrl} />
         </div>
       )}
+      {savedPath && <p>Saved to {savedPath}</p>}
     </div>
   )
 }

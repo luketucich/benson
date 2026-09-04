@@ -1,5 +1,6 @@
-import { app, shell, BrowserWindow, Tray, Menu, nativeImage } from 'electron'
+import { app, shell, BrowserWindow, Tray, Menu, nativeImage, ipcMain } from 'electron'
 import { join } from 'path'
+import { mkdirSync, writeFileSync } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import trayIcon from '../../resources/trayTemplate.png?asset'
@@ -59,6 +60,19 @@ app.whenReady().then(() => {
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
+  })
+
+  // The page sends the recording here to be written to disk.
+  ipcMain.handle('save-recording', (_, bytes: ArrayBuffer) => {
+    const folder = join(app.getPath('userData'), 'recordings')
+    mkdirSync(folder, { recursive: true })
+
+    // Name the file with the current date and time, like 2026-09-03T15-10-04-162Z.webm
+    // Colons and dots are swapped for dashes because Mac does not allow colons in file names.
+    const name = new Date().toISOString().replace(/[:.]/g, '-') + '.webm'
+    const filePath = join(folder, name)
+    writeFileSync(filePath, Buffer.from(bytes))
+    return filePath
   })
 
   createTray()
