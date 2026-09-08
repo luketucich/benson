@@ -5,6 +5,7 @@ Benson is a desktop app for saving a quick thought without leaving what you are 
 ## Documents
 
 - [MVP plan](docs/mvp-plan.md)
+- [Local transcription](docs/transcription.md)
 - [Weekly updates](docs/weekly-updates/)
 - [Meeting notes](docs/meeting-notes/)
 
