@@ -1,9 +1,14 @@
 import { app, shell, BrowserWindow, Tray, Menu, nativeImage, ipcMain } from 'electron'
 import { join } from 'path'
 import { mkdirSync, writeFileSync } from 'fs'
+import { execFile } from 'child_process'
+import { promisify } from 'util'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import trayIcon from '../../resources/trayTemplate.png?asset'
+
+// Allow us to wait for a program to finish using await.
+const runProgram = promisify(execFile)
 
 // Kept at module scope so the tray is not garbage collected.
 let tray: Tray | null = null
@@ -73,6 +78,20 @@ app.whenReady().then(() => {
     const filePath = join(folder, name)
     writeFileSync(filePath, Buffer.from(bytes))
     return filePath
+  })
+
+  // The page sends a saved recording path here to be turned into text.
+  ipcMain.handle('transcribe-recording', async (_, filePath: string) => {
+    // The script lives in the repo's scripts folder, one level above the app folder.
+    const script = join(app.getAppPath(), '..', 'scripts', 'transcribe.py')
+
+    // This runs: uv run <script> <recording path>.
+    const argumentsForPython = ['run', script, filePath]
+    const result = await runProgram('uv', argumentsForPython)
+
+    // stdout is the text Python printed. Send it back to the page.
+    const transcript = result.stdout.trim()
+    return transcript
   })
 
   createTray()

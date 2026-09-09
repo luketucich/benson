@@ -1,26 +1,18 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
 
-// Custom APIs for renderer
-const api = {
-  // Send the recording to the main process and get back the saved file path.
-  saveRecording: (bytes: ArrayBuffer): Promise<string> =>
-    ipcRenderer.invoke('save-recording', bytes)
+// Send the audio to the matching handler in main/index.ts and wait for its reply.
+async function saveRecording(bytes: ArrayBuffer): Promise<string> {
+  const filePath = await ipcRenderer.invoke('save-recording', bytes)
+  return filePath
 }
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
+async function transcribeRecording(filePath: string): Promise<string> {
+  const transcript = await ipcRenderer.invoke('transcribe-recording', filePath)
+  return transcript
 }
+
+// Let the page call these functions through window.api.
+contextBridge.exposeInMainWorld('api', {
+  saveRecording: saveRecording,
+  transcribeRecording: transcribeRecording
+})
