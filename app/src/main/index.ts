@@ -6,6 +6,7 @@ import { promisify } from 'util'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import trayIcon from '../../resources/trayTemplate.png?asset'
+import { openDatabase, saveRecording, saveTranscript, closeDatabase } from './database'
 
 // Allow us to wait for a program to finish using await.
 const runProgram = promisify(execFile)
@@ -57,6 +58,10 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  const dataFolder = app.getPath('userData')
+  mkdirSync(dataFolder, { recursive: true })
+  openDatabase(join(dataFolder, 'benson.sqlite'))
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.luketucich.benson')
 
@@ -74,9 +79,12 @@ app.whenReady().then(() => {
 
     // Name the file with the current date and time, like 2026-09-03T15-10-04-162Z.webm
     // Colons and dots are swapped for dashes because Mac does not allow colons in file names.
-    const name = new Date().toISOString().replace(/[:.]/g, '-') + '.webm'
+    const createdAt = new Date().toISOString()
+    const name = createdAt.replace(/[:.]/g, '-') + '.webm'
     const filePath = join(folder, name)
     writeFileSync(filePath, Buffer.from(bytes))
+    // Save the entry before transcription, so it remains if transcription fails.
+    saveRecording(filePath, createdAt)
     return filePath
   })
 
@@ -91,6 +99,7 @@ app.whenReady().then(() => {
 
     // stdout is the text Python printed. Send it back to the page.
     const transcript = result.stdout.trim()
+    saveTranscript(filePath, transcript)
     return transcript
   })
 
@@ -103,6 +112,8 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
+
+app.on('will-quit', closeDatabase)
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
