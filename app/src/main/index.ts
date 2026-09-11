@@ -31,7 +31,6 @@ function createTray(): void {
 }
 
 function createWindow(): void {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
@@ -53,8 +52,7 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
+  // Use the development server while coding, or the built page otherwise.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -62,20 +60,15 @@ function createWindow(): void {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+// Set up storage and requests before opening the window.
 app.whenReady().then(() => {
   const dataFolder = app.getPath('userData')
   mkdirSync(dataFolder, { recursive: true })
   openDatabase(join(dataFolder, 'benson.sqlite'))
 
-  // Set app user model id for windows
   electronApp.setAppUserModelId('com.luketucich.benson')
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+  // Set up Electron's development shortcuts.
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
@@ -85,8 +78,7 @@ app.whenReady().then(() => {
     const folder = join(app.getPath('userData'), 'recordings')
     mkdirSync(folder, { recursive: true })
 
-    // Name the file with the current date and time, like 2026-09-03T15-10-04-162Z.webm
-    // Colons and dots are swapped for dashes because Mac does not allow colons in file names.
+    // Use the recording time as the file name, with dashes instead of punctuation.
     const createdAt = new Date().toISOString()
     const name = createdAt.replace(/[:.]/g, '-') + '.webm'
     const filePath = join(folder, name)
@@ -131,22 +123,16 @@ app.whenReady().then(() => {
   createWindow()
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
+    // Reopen the window when the Dock icon is clicked.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
 
 app.on('will-quit', closeDatabase)
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+// On Mac, keep the menu bar app running after the window closes.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

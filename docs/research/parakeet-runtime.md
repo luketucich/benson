@@ -2,7 +2,7 @@
 
 ## What I Picked
 
-I am starting with **parakeet-mlx and Parakeet TDT 0.6B v2**. It is straightforward to set up, optimized for Apple Silicon, and keeps me focused on getting the recording flow working. I still need to test its speed on my own recordings.
+I am starting with **parakeet-mlx and Parakeet TDT 0.6B v2**. It is straightforward to set up, optimized for Apple Silicon, and keeps me focused on getting the recording flow working. The first recording test worked, but accuracy needs more testing.
 
 ## Why I Need a Runtime
 

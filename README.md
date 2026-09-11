@@ -10,6 +10,14 @@ Benson is a desktop app for saving a quick thought without leaving what you are 
 - [Weekly updates](docs/weekly-updates/)
 - [Meeting notes](docs/meeting-notes/)
 
+## Code Layout
+
+- `app/src/main/`: Window, recording files, and SQLite storage.
+- `app/src/preload/`: Functions the screen can call through `window.api`.
+- `app/src/renderer/src/`: The React screen and `styles.css`.
+- `app/src/recording.ts`: The fields shared by saved recordings.
+- `scripts/transcribe.py`: The Python script that runs Parakeet.
+
 ## Timeline
 
 The goal is to finish the full MVP by **Friday, October 2, 2026**. Weekly meetings with my professor happen on Wednesdays, and a weekly update goes out every Friday.

@@ -31,7 +31,7 @@ The MVP is finished when all six steps work end to end.
 
 - **Desktop app:** Electron, React, and TypeScript
 - **Speech-to-text:** NVIDIA Parakeet TDT 0.6B v2
-- **Speech runtime on Mac:** To be decided after testing a few options
+- **Speech runtime on Mac:** parakeet-mlx
 - **Local model:** Qwen3.5 4B
 - **Local storage:** SQLite
 - **Destination:** Obsidian

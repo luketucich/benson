@@ -1,6 +1,6 @@
 # Local Transcription
 
-This script runs a saved recording through Parakeet v2 and prints the text. It is separate from the app for now.
+Benson runs saved recordings through Parakeet v2 and displays the text. The Python script can also be run on its own.
 
 ## Setup
 
