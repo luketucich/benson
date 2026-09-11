@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { SavedRecording } from '../../recording'
 
 function App(): React.JSX.Element {
   const [recording, setRecording] = useState(false)
@@ -7,9 +8,31 @@ function App(): React.JSX.Element {
   const [transcript, setTranscript] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [history, setHistory] = useState<SavedRecording[]>([])
+  const [historyLoading, setHistoryLoading] = useState(true)
+  const [historyError, setHistoryError] = useState<string | null>(null)
 
   // The recorder lives here so it survives between renders.
   const recorderRef = useRef<MediaRecorder | null>(null)
+
+  function loadHistory(): Promise<void> {
+    return window.api
+      .getRecordings()
+      .then((recordings) => {
+        setHistory(recordings)
+        setHistoryError(null)
+      })
+      .catch(() => {
+        setHistoryError('Could not load your recordings. Try again.')
+      })
+      .finally(() => {
+        setHistoryLoading(false)
+      })
+  }
+
+  useEffect(() => {
+    loadHistory()
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -33,6 +56,25 @@ function App(): React.JSX.Element {
     } catch (error) {
       setError(`Could not save or transcribe the recording: ${String(error)}`)
     } finally {
+      await loadHistory()
+      setBusy(false)
+    }
+  }
+
+  async function openRecording(recording: SavedRecording): Promise<void> {
+    setBusy(true)
+    setError(null)
+    setSavedPath(recording.audio_path)
+    setTranscript(recording.transcript)
+    setAudioUrl(null)
+
+    try {
+      const bytes = await window.api.readRecording(recording.id)
+      const blob = new Blob([bytes], { type: 'audio/webm' })
+      setAudioUrl(URL.createObjectURL(blob))
+    } catch {
+      setError('Could not open the audio. The file may have been moved or removed.')
+    } finally {
       setBusy(false)
     }
   }
@@ -40,6 +82,10 @@ function App(): React.JSX.Element {
   async function startRecording(): Promise<void> {
     setError(null)
     setBusy(true)
+    // Close the old player before recording a new clip.
+    setAudioUrl(null)
+    setSavedPath(null)
+    setTranscript(null)
     let mic: MediaStream | null = null
     try {
       // Ask for the mic. Mac will ask for permission the first time.
@@ -80,21 +126,57 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <div>
+    <main>
       <h1>Benson</h1>
       <button disabled={busy} onClick={recording ? stopRecording : startRecording}>
-        {recording ? 'Stop' : 'Record'}
+        {recording ? 'Stop recording' : 'Record'}
       </button>
-      {audioUrl && (
-        <div>
-          <audio controls src={audioUrl} />
-        </div>
-      )}
-      {savedPath && <p>Saved to {savedPath}</p>}
+      {recording && <p role="status">Recording...</p>}
       {busy && <p role="status">Working...</p>}
       {error && <p role="alert">{error}</p>}
-      {transcript && <p>{transcript}</p>}
-    </div>
+
+      {(audioUrl || savedPath) && (
+        <section aria-label="Selected recording">
+          {audioUrl && <audio controls src={audioUrl} aria-label="Recording playback" />}
+          <h2>Transcript</h2>
+          {transcript ? (
+            <p className="transcript">{transcript}</p>
+          ) : (
+            !busy && <p>No transcript available.</p>
+          )}
+        </section>
+      )}
+
+      <section aria-labelledby="history-heading">
+        <h2 id="history-heading">History</h2>
+        {historyLoading && <p role="status">Loading recordings...</p>}
+        {historyError && (
+          <div>
+            <p role="alert">{historyError}</p>
+            <button disabled={busy || recording} onClick={loadHistory}>
+              Try again
+            </button>
+          </div>
+        )}
+        {!historyLoading && !historyError && history.length === 0 && (
+          <p>Your recordings will appear here.</p>
+        )}
+        <ul>
+          {history.map((item) => (
+            <li key={item.id}>
+              <button
+                disabled={busy || recording}
+                aria-pressed={savedPath === item.audio_path}
+                onClick={() => openRecording(item)}
+              >
+                {new Date(item.created_at).toLocaleString()}
+              </button>{' '}
+              {item.transcript ? item.transcript.slice(0, 100) : 'No transcript available'}
+            </li>
+          ))}
+        </ul>
+      </section>
+    </main>
   )
 }
 

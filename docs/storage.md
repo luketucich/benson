@@ -6,4 +6,4 @@ Benson saves the recording first, then adds the transcript when Parakeet finishe
 
 The database is `benson.sqlite` in `~/Library/Application Support/benson/`. SQLite is included with Electron, so there is nothing extra to install.
 
-The history list is next. Older audio files have not been added to the database yet.
+History shows saved recordings, newest first. Select one to play the audio and read its transcript. Older audio files have not been added to the database yet.

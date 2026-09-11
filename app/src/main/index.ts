@@ -1,12 +1,20 @@
 import { app, shell, BrowserWindow, Tray, Menu, nativeImage, ipcMain } from 'electron'
 import { join } from 'path'
 import { mkdirSync, writeFileSync } from 'fs'
+import { readFile } from 'fs/promises'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import trayIcon from '../../resources/trayTemplate.png?asset'
-import { openDatabase, saveRecording, saveTranscript, closeDatabase } from './database'
+import {
+  openDatabase,
+  saveRecording,
+  saveTranscript,
+  closeDatabase,
+  getRecordings,
+  getRecording
+} from './database'
 
 // Allow us to wait for a program to finish using await.
 const runProgram = promisify(execFile)
@@ -101,6 +109,22 @@ app.whenReady().then(() => {
     const transcript = result.stdout.trim()
     saveTranscript(filePath, transcript)
     return transcript
+  })
+
+  ipcMain.handle('get-recordings', () => {
+    return getRecordings()
+  })
+
+  ipcMain.handle('read-recording', async (_, id: number) => {
+    const recording = getRecording(id)
+    if (!recording) {
+      throw new Error('Recording not found.')
+    }
+
+    // Look up the saved path here, then send the audio bytes to the page.
+    const bytes = await readFile(recording.audio_path)
+    const audio = new Uint8Array(bytes)
+    return audio.buffer
   })
 
   createTray()

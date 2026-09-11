@@ -1,4 +1,5 @@
 import { DatabaseSync } from 'node:sqlite'
+import type { SavedRecording } from '../recording'
 
 let database: DatabaseSync
 
@@ -38,4 +39,14 @@ export function saveTranscript(filePath: string, transcript: string): void {
 
 export function closeDatabase(): void {
   if (database) database.close()
+}
+
+export function getRecordings(): SavedRecording[] {
+  const statement = database.prepare('SELECT * FROM recordings ORDER BY created_at DESC, id DESC')
+  return statement.all() as SavedRecording[]
+}
+
+export function getRecording(id: number): SavedRecording | undefined {
+  const statement = database.prepare('SELECT * FROM recordings WHERE id = ?')
+  return statement.get(id) as SavedRecording | undefined
 }
