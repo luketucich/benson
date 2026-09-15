@@ -35,7 +35,7 @@ The MVP is finished when all six steps work end to end.
 - **Local model:** Qwen3.5 4B
 - **Local storage:** SQLite
 - **Destination:** Obsidian
-- **Connector:** An Obsidian MCP
+- **Connector:** [MCPVault](https://github.com/bitbonsai/mcpvault)
 
 ## Ollama or llama.cpp
 

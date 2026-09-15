@@ -7,12 +7,13 @@ Benson is a desktop app for saving a quick thought without leaving what you are 
 - [MVP plan](docs/mvp-plan.md)
 - [Local transcription](docs/transcription.md)
 - [Local storage](docs/storage.md)
+- [Obsidian](docs/obsidian.md)
 - [Weekly updates](https://github.com/luketucich/benson/wiki)
 - [Meeting notes](docs/meeting-notes/)
 
 ## Code Layout
 
-- `app/src/main/`: Window, recording files, and SQLite storage.
+- `app/src/main/`: Window, recording files, SQLite storage, and the Obsidian connection.
 - `app/src/preload/`: Functions the screen can call through `window.api`.
 - `app/src/renderer/src/`: The React screen and `styles.css`.
 - `app/src/recording.ts`: The fields shared by saved recordings.
