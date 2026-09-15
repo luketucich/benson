@@ -15,6 +15,7 @@ import {
   getRecordings,
   getRecording
 } from './database'
+import { connectToVault, closeVault } from './obsidian'
 
 // Allow us to wait for a program to finish using await.
 const runProgram = promisify(execFile)
@@ -65,6 +66,14 @@ app.whenReady().then(() => {
   const dataFolder = app.getPath('userData')
   mkdirSync(dataFolder, { recursive: true })
   openDatabase(join(dataFolder, 'benson.sqlite'))
+
+  // For now, Benson uses one vault in Documents.
+  const vaultPath = join(app.getPath('documents'), 'Benson Vault')
+  mkdirSync(vaultPath, { recursive: true })
+  const mcpVault = join(app.getAppPath(), 'node_modules/@bitbonsai/mcpvault/dist/server.js')
+  connectToVault(vaultPath, mcpVault)
+    .then(() => console.log(`Connected to the Obsidian vault at ${vaultPath}`))
+    .catch((error) => console.error('Could not connect to the Obsidian vault:', error))
 
   electronApp.setAppUserModelId('com.luketucich.benson')
 
@@ -128,7 +137,10 @@ app.whenReady().then(() => {
   })
 })
 
-app.on('will-quit', closeDatabase)
+app.on('will-quit', () => {
+  closeDatabase()
+  closeVault()
+})
 
 // On Mac, keep the menu bar app running after the window closes.
 app.on('window-all-closed', () => {
