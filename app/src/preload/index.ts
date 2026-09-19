@@ -22,10 +22,15 @@ async function readRecording(id: number): Promise<ArrayBuffer> {
   return audio
 }
 
+async function sendToObsidian(id: number): Promise<void> {
+  await ipcRenderer.invoke('send-to-obsidian', id)
+}
+
 // Let the page call these functions through window.api.
 contextBridge.exposeInMainWorld('api', {
   saveRecording: saveRecording,
   transcribeRecording: transcribeRecording,
   getRecordings: getRecordings,
-  readRecording: readRecording
+  readRecording: readRecording,
+  sendToObsidian: sendToObsidian
 })

@@ -11,9 +11,13 @@ function App(): React.JSX.Element {
   const [history, setHistory] = useState<SavedRecording[]>([])
   const [historyLoading, setHistoryLoading] = useState(true)
   const [historyError, setHistoryError] = useState<string | null>(null)
+  const [sentMessage, setSentMessage] = useState('')
 
   // The recorder lives here so it survives between renders.
   const recorderRef = useRef<MediaRecorder | null>(null)
+
+  // Find the saved entry for the recording on screen.
+  const selected = history.find((item) => item.audio_path === savedPath)
 
   function loadHistory(): Promise<void> {
     return window.api
@@ -61,9 +65,25 @@ function App(): React.JSX.Element {
     }
   }
 
+  async function sendToObsidian(id: number): Promise<void> {
+    setBusy(true)
+    setError(null)
+    setSentMessage('')
+
+    try {
+      await window.api.sendToObsidian(id)
+      setSentMessage('Sent to Benson Inbox in Obsidian.')
+    } catch {
+      setError('Could not send the transcript to Obsidian. Try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function openRecording(recording: SavedRecording): Promise<void> {
     setBusy(true)
     setError(null)
+    setSentMessage('')
     setSavedPath(recording.audio_path)
     setTranscript(recording.transcript)
     setAudioUrl(null)
@@ -81,6 +101,7 @@ function App(): React.JSX.Element {
 
   async function startRecording(): Promise<void> {
     setError(null)
+    setSentMessage('')
     setBusy(true)
     // Close the old player before recording a new clip.
     setAudioUrl(null)
@@ -144,6 +165,12 @@ function App(): React.JSX.Element {
           ) : (
             !busy && <p>No transcript available.</p>
           )}
+          {selected?.transcript && (
+            <button disabled={busy || recording} onClick={() => sendToObsidian(selected.id)}>
+              Send to Obsidian
+            </button>
+          )}
+          {sentMessage && <p role="status">{sentMessage}</p>}
         </section>
       )}
 

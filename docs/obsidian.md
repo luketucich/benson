@@ -5,3 +5,5 @@ Benson connects to Obsidian through [MCPVault](https://github.com/bitbonsai/mcpv
 When Benson starts, it runs MCPVault on `~/Documents/Benson Vault` and connects to it. MCPVault stops when Benson quits. To see the notes, choose **Open folder as vault** in Obsidian and pick that folder.
 
 MCPVault runs with the Node.js included in Electron, so there is nothing extra to install.
+
+Select a recording with a transcript and click **Send to Obsidian** to add it to the end of `Benson Inbox.md`. Benson only lets MCPVault read and write notes, so it cannot delete, move, or rename them.

@@ -9,6 +9,7 @@ declare global {
       transcribeRecording(filePath: string): Promise<string>
       getRecordings(): Promise<SavedRecording[]>
       readRecording(id: number): Promise<ArrayBuffer>
+      sendToObsidian(id: number): Promise<void>
     }
   }
 }

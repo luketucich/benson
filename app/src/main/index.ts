@@ -15,7 +15,7 @@ import {
   getRecordings,
   getRecording
 } from './database'
-import { connectToVault, closeVault } from './obsidian'
+import { connectToVault, closeVault, appendToNote } from './obsidian'
 
 // Allow us to wait for a program to finish using await.
 const runProgram = promisify(execFile)
@@ -126,6 +126,15 @@ app.whenReady().then(() => {
     const bytes = await readFile(recording.audio_path)
     const audio = new Uint8Array(bytes)
     return audio.buffer
+  })
+
+  // Add the recording's transcript to the end of the Benson Inbox note.
+  ipcMain.handle('send-to-obsidian', async (_, id: number) => {
+    const recording = getRecording(id)
+    if (!recording?.transcript) {
+      throw new Error('This recording has no transcript to send.')
+    }
+    await appendToNote('Benson Inbox.md', recording.transcript)
   })
 
   createTray()
