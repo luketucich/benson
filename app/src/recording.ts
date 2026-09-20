@@ -4,4 +4,5 @@ export type SavedRecording = {
   created_at: string
   audio_path: string
   transcript: string | null
+  sent_at: string | null
 }

@@ -73,6 +73,7 @@ function App(): React.JSX.Element {
     try {
       await window.api.sendToObsidian(id)
       setSentMessage('Sent to Benson Inbox in Obsidian.')
+      await loadHistory()
     } catch {
       setError('Could not send the transcript to Obsidian. Try again.')
     } finally {
@@ -199,6 +200,9 @@ function App(): React.JSX.Element {
                 {new Date(item.created_at).toLocaleString()}
               </button>{' '}
               {item.transcript ? item.transcript.slice(0, 100) : 'No transcript available'}
+              {item.sent_at && (
+                <p>Last sent to Obsidian: {new Date(item.sent_at).toLocaleString()}</p>
+              )}
             </li>
           ))}
         </ul>

@@ -13,7 +13,8 @@ import {
   saveTranscript,
   closeDatabase,
   getRecordings,
-  getRecording
+  getRecording,
+  markRecordingSent
 } from './database'
 import { connectToVault, closeVault, appendToNote } from './obsidian'
 
@@ -135,6 +136,7 @@ app.whenReady().then(() => {
       throw new Error('This recording has no transcript to send.')
     }
     await appendToNote('Benson Inbox.md', recording.transcript)
+    markRecordingSent(id)
   })
 
   createTray()

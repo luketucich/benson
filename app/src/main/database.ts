@@ -15,6 +15,12 @@ export function openDatabase(filePath: string): void {
       transcript TEXT
     )
   `)
+
+  // Add the sent_at column if it is missing.
+  const columns = database.prepare('PRAGMA table_info(recordings)').all()
+  if (!columns.some((column) => column.name === 'sent_at')) {
+    database.exec('ALTER TABLE recordings ADD COLUMN sent_at TEXT')
+  }
 }
 
 export function saveRecording(filePath: string, createdAt: string): void {
@@ -35,6 +41,11 @@ export function saveTranscript(filePath: string, transcript: string): void {
   if (result.changes === 0) {
     throw new Error('The recording was not found in the database.')
   }
+}
+
+export function markRecordingSent(id: number): void {
+  const statement = database.prepare('UPDATE recordings SET sent_at = ? WHERE id = ?')
+  statement.run(new Date().toISOString(), id)
 }
 
 export function closeDatabase(): void {
