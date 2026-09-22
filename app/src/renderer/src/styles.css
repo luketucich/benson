@@ -11,8 +11,18 @@ body {
   background: #1b1b1f;
 }
 
-button {
+button,
+textarea {
   font: inherit;
+}
+
+textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 8px 0;
+  padding: 8px;
+  resize: vertical;
 }
 
 section {

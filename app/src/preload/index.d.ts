@@ -10,6 +10,7 @@ declare global {
       getRecordings(): Promise<SavedRecording[]>
       readRecording(id: number): Promise<ArrayBuffer>
       sendToObsidian(id: number): Promise<void>
+      askQwen(prompt: string, transcript: string): Promise<string>
     }
   }
 }

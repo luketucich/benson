@@ -17,6 +17,7 @@ import {
   markRecordingSent
 } from './database'
 import { connectToVault, closeVault, appendToNote } from './obsidian'
+import { askQwen } from './qwen'
 
 // Allow us to wait for a program to finish using await.
 const runProgram = promisify(execFile)
@@ -127,6 +128,12 @@ app.whenReady().then(() => {
     const bytes = await readFile(recording.audio_path)
     const audio = new Uint8Array(bytes)
     return audio.buffer
+  })
+
+  ipcMain.handle('ask-qwen', async (_, prompt: string, transcript: string) => {
+    if (!prompt.trim() || !transcript.trim())
+      throw new Error('A prompt and transcript are required.')
+    return askQwen(prompt, transcript)
   })
 
   // Add the recording's transcript to the end of the Benson Inbox note.

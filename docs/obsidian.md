@@ -6,4 +6,6 @@ When Benson starts, it runs MCPVault on `~/Documents/Benson Vault` and connects 
 
 MCPVault runs with the Node.js included in Electron, so there is nothing extra to install.
 
-Select a recording with a transcript and click **Send to Obsidian** to add it to the end of `Benson Inbox.md`. Benson only lets MCPVault read and write notes, so it cannot delete, move, or rename them.
+After you stop recording, Benson saves the transcript and adds it to `Benson Inbox.md`. The **Send to Obsidian** button also lets you send an older recording or retry a failed send. Sending again adds the transcript again.
+
+Benson then uses the prompt on screen to ask Qwen for a classification and shows its reply. Ollama must be running with `qwen3.5:4b` installed. Qwen replies are not saved or sent to Obsidian.

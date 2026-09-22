@@ -12,6 +12,11 @@ function App(): React.JSX.Element {
   const [historyLoading, setHistoryLoading] = useState(true)
   const [historyError, setHistoryError] = useState<string | null>(null)
   const [sentMessage, setSentMessage] = useState('')
+  const [prompt, setPrompt] = useState(
+    'Classify this transcript as Task, Idea, Reference, Journal, or Unclear. Give the category and one short reason in plain text. Do not guess if the meaning is unclear.'
+  )
+  const [qwenReply, setQwenReply] = useState('')
+  const [qwenError, setQwenError] = useState('')
 
   // The recorder lives here so it survives between renders.
   const recorderRef = useRef<MediaRecorder | null>(null)
@@ -44,7 +49,7 @@ function App(): React.JSX.Element {
     }
   }, [audioUrl])
 
-  async function saveAndTranscribe(blob: Blob): Promise<void> {
+  async function processRecording(blob: Blob): Promise<void> {
     setBusy(true)
     setTranscript(null)
     setSavedPath(null)
@@ -57,11 +62,39 @@ function App(): React.JSX.Element {
 
       const text = await window.api.transcribeRecording(path)
       setTranscript(text)
+      if (!text.trim()) throw new Error('No speech was found in the recording.')
+
+      try {
+        const recordings = await window.api.getRecordings()
+        const saved = recordings.find((item) => item.audio_path === path)
+        if (!saved) throw new Error('Recording not found.')
+        await window.api.sendToObsidian(saved.id)
+        setSentMessage('Sent to Benson Inbox in Obsidian.')
+      } catch {
+        setError(
+          'Recording saved, but it could not be sent to Obsidian. Use Send to Obsidian to retry.'
+        )
+      }
+
+      // Still ask Qwen if sending to Obsidian fails.
+      await classifyTranscript(text)
     } catch (error) {
       setError(`Could not save or transcribe the recording: ${String(error)}`)
     } finally {
       await loadHistory()
       setBusy(false)
+    }
+  }
+
+  async function classifyTranscript(text: string): Promise<void> {
+    setQwenReply('')
+    setQwenError('')
+    try {
+      setQwenReply(await window.api.askQwen(prompt, text))
+    } catch {
+      setQwenError(
+        'Could not classify the transcript. Check that Ollama is running, then try again.'
+      )
     }
   }
 
@@ -82,6 +115,8 @@ function App(): React.JSX.Element {
   }
 
   async function openRecording(recording: SavedRecording): Promise<void> {
+    setQwenReply('')
+    setQwenError('')
     setBusy(true)
     setError(null)
     setSentMessage('')
@@ -101,6 +136,8 @@ function App(): React.JSX.Element {
   }
 
   async function startRecording(): Promise<void> {
+    setQwenReply('')
+    setQwenError('')
     setError(null)
     setSentMessage('')
     setBusy(true)
@@ -127,7 +164,7 @@ function App(): React.JSX.Element {
         recorderRef.current = null
 
         const blob = new Blob(chunks, { type: 'audio/webm' })
-        await saveAndTranscribe(blob)
+        await processRecording(blob)
       }
 
       recorder.start()
@@ -150,7 +187,25 @@ function App(): React.JSX.Element {
   return (
     <main>
       <h1>Benson</h1>
-      <button disabled={busy} onClick={recording ? stopRecording : startRecording}>
+      <label htmlFor="qwen-prompt">Qwen prompt</label>
+      <textarea
+        id="qwen-prompt"
+        rows={4}
+        value={prompt}
+        disabled={busy || recording}
+        onChange={(event) => {
+          setPrompt(event.target.value)
+          setQwenReply('')
+        }}
+      />
+      <p>
+        Stopping a recording saves it, sends the transcript to Obsidian, and asks Qwen to classify
+        it.
+      </p>
+      <button
+        disabled={busy || (!recording && !prompt.trim())}
+        onClick={recording ? stopRecording : startRecording}
+      >
         {recording ? 'Stop recording' : 'Record'}
       </button>
       {recording && <p role="status">Recording...</p>}
@@ -172,6 +227,30 @@ function App(): React.JSX.Element {
             </button>
           )}
           {sentMessage && <p role="status">{sentMessage}</p>}
+          {qwenError && (
+            <>
+              <p role="alert">{qwenError}</p>
+              <button
+                disabled={busy || recording || !prompt.trim()}
+                onClick={async () => {
+                  if (!transcript) return
+                  setBusy(true)
+                  await classifyTranscript(transcript)
+                  setBusy(false)
+                }}
+              >
+                Retry Qwen
+              </button>
+            </>
+          )}
+          <div aria-live="polite">
+            {qwenReply && (
+              <>
+                <h2>Qwen reply</h2>
+                <p className="transcript">{qwenReply}</p>
+              </>
+            )}
+          </div>
         </section>
       )}
 

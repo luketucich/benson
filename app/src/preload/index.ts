@@ -26,11 +26,17 @@ async function sendToObsidian(id: number): Promise<void> {
   await ipcRenderer.invoke('send-to-obsidian', id)
 }
 
+async function askQwen(prompt: string, transcript: string): Promise<string> {
+  const reply = await ipcRenderer.invoke('ask-qwen', prompt, transcript)
+  return reply
+}
+
 // Let the page call these functions through window.api.
 contextBridge.exposeInMainWorld('api', {
   saveRecording: saveRecording,
   transcribeRecording: transcribeRecording,
   getRecordings: getRecordings,
   readRecording: readRecording,
-  sendToObsidian: sendToObsidian
+  sendToObsidian: sendToObsidian,
+  askQwen: askQwen
 })
