@@ -8,4 +8,8 @@ MCPVault runs with the Node.js included in Electron, so there is nothing extra t
 
 After you stop recording, Benson saves the transcript and adds it to `Benson Inbox.md`. The **Send to Obsidian** button also lets you send an older recording or retry a failed send. Sending again adds the transcript again.
 
-Benson then uses the prompt on screen to ask Qwen for a classification and shows its reply. Ollama must be running with `qwen3.5:4b` installed. Qwen replies are not saved or sent to Obsidian.
+Benson searches for matching notes and gives Qwen their paths and up to 3,000 characters from each note. It skips `Benson Inbox.md`, since that already contains the transcript. Qwen uses the prompt on screen to suggest a category and destination. This is a suggestion only; transcripts still go to the Inbox.
+
+Ollama must be running with `qwen3.5:4b` installed. Qwen replies are not saved or sent to Obsidian.
+
+Suggestions can be wrong, especially for unclear transcripts. Search matches words from the transcript, so different wording can miss a relevant note.
