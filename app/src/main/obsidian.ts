@@ -22,7 +22,7 @@ export async function closeVault(): Promise<void> {
 }
 
 // Benson only uses these MCPVault tools, so it cannot delete, move, or rename notes.
-const allowedTools = ['read_note', 'write_note']
+const allowedTools = ['list_directory', 'search_notes', 'read_note', 'write_note']
 
 async function callTool(name: string, args: Record<string, unknown>): Promise<string> {
   if (!client) throw new Error('Benson is not connected to the Obsidian vault.')
@@ -33,6 +33,29 @@ async function callTool(name: string, args: Record<string, unknown>): Promise<st
   const text = result.content.map((part) => (part.type === 'text' ? part.text : '')).join('')
   if (result.isError) throw new Error(text)
   return text
+}
+
+// List the files and folders in one vault folder.
+export async function listDirectory(path = '/'): Promise<string> {
+  return callTool('list_directory', { path })
+}
+
+// Find up to five notes containing the search text.
+export async function searchNotes(query: string): Promise<string> {
+  if (!query.trim()) throw new Error('Enter some search text.')
+
+  return callTool('search_notes', {
+    query: query.trim(),
+    limit: 5
+  })
+}
+
+// Read a note's text.
+export async function readNote(path: string): Promise<string> {
+  if (!path.endsWith('.md')) throw new Error('Obsidian notes must end in .md.')
+
+  const result = await callTool('read_note', { path })
+  return JSON.parse(result).content
 }
 
 // Add text to the end of a note. MCPVault creates the note if it is missing.
