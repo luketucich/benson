@@ -32,6 +32,10 @@ async function askQwen(prompt: string, transcript: string): Promise<NoteDraft> {
   return reply
 }
 
+async function saveApprovedDraft(id: number, draft: NoteDraft): Promise<void> {
+  await ipcRenderer.invoke('save-approved-draft', id, draft)
+}
+
 // Let the page call these functions through window.api.
 contextBridge.exposeInMainWorld('api', {
   saveRecording: saveRecording,
@@ -39,5 +43,6 @@ contextBridge.exposeInMainWorld('api', {
   getRecordings: getRecordings,
   readRecording: readRecording,
   sendToObsidian: sendToObsidian,
-  askQwen: askQwen
+  askQwen: askQwen,
+  saveApprovedDraft: saveApprovedDraft
 })

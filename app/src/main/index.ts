@@ -18,6 +18,7 @@ import {
 } from './database'
 import { connectToVault, closeVault, appendToNote } from './obsidian'
 import { suggestNote } from './noteSuggestion'
+import { saveApprovedDraft, setDraftVault } from './noteWriter'
 
 // Allow us to wait for a program to finish using await.
 const runProgram = promisify(execFile)
@@ -74,7 +75,10 @@ app.whenReady().then(() => {
   mkdirSync(vaultPath, { recursive: true })
   const mcpVault = join(app.getAppPath(), 'node_modules/@bitbonsai/mcpvault/dist/server.js')
   connectToVault(vaultPath, mcpVault)
-    .then(() => console.log(`Connected to the Obsidian vault at ${vaultPath}`))
+    .then(() => {
+      setDraftVault(vaultPath)
+      console.log(`Connected to the Obsidian vault at ${vaultPath}`)
+    })
     .catch((error) => console.error('Could not connect to the Obsidian vault:', error))
 
   electronApp.setAppUserModelId('com.luketucich.benson')
@@ -134,6 +138,10 @@ app.whenReady().then(() => {
     if (!prompt.trim() || !transcript.trim())
       throw new Error('A prompt and transcript are required.')
     return suggestNote(prompt, transcript)
+  })
+
+  ipcMain.handle('save-approved-draft', (_, id: number, draft: unknown) => {
+    return saveApprovedDraft(id, draft)
   })
 
   // Add the recording's transcript to the end of the Benson Inbox note.
