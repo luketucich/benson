@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { SavedRecording } from '../recording'
+import type { NoteDraft } from '../noteDraft'
 
 // Send the audio to the matching handler in main/index.ts and wait for its reply.
 async function saveRecording(bytes: ArrayBuffer): Promise<string> {
@@ -26,7 +27,7 @@ async function sendToObsidian(id: number): Promise<void> {
   await ipcRenderer.invoke('send-to-obsidian', id)
 }
 
-async function askQwen(prompt: string, transcript: string): Promise<string> {
+async function askQwen(prompt: string, transcript: string): Promise<NoteDraft> {
   const reply = await ipcRenderer.invoke('ask-qwen', prompt, transcript)
   return reply
 }

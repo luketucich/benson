@@ -1,4 +1,5 @@
 import type { SavedRecording } from '../recording'
+import type { NoteDraft } from '../noteDraft'
 
 // This file only tells TypeScript what preload/index.ts adds to window.
 // It does not run code. Promise<string> means the text arrives asynchronously.
@@ -10,7 +11,7 @@ declare global {
       getRecordings(): Promise<SavedRecording[]>
       readRecording(id: number): Promise<ArrayBuffer>
       sendToObsidian(id: number): Promise<void>
-      askQwen(prompt: string, transcript: string): Promise<string>
+      askQwen(prompt: string, transcript: string): Promise<NoteDraft>
     }
   }
 }

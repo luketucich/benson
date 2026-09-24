@@ -13,7 +13,7 @@ function App(): React.JSX.Element {
   const [historyError, setHistoryError] = useState<string | null>(null)
   const [sentMessage, setSentMessage] = useState('')
   const [prompt, setPrompt] = useState(
-    'Classify this transcript as Task, Idea, Reference, Journal, or Unclear. Suggest an existing note to add it to, or a new note if none fits. Give the category, note path, and one short reason in plain text.'
+    'Classify this transcript as Task, Idea, Reference, Journal, or Unclear. Suggest an existing note to add it to, or a new note if none fits. Prepare the note text and give one short reason. Ask a question if the request is unclear.'
   )
   const [qwenReply, setQwenReply] = useState('')
   const [qwenError, setQwenError] = useState('')
@@ -90,7 +90,10 @@ function App(): React.JSX.Element {
     setQwenReply('')
     setQwenError('')
     try {
-      setQwenReply(await window.api.askQwen(prompt, text))
+      const draft = await window.api.askQwen(prompt, text)
+      setQwenReply(
+        `${draft.category}: ${draft.action}\n${draft.path}\n${draft.content}\n${draft.explanation}`
+      )
     } catch {
       setQwenError(
         'Could not prepare a suggestion. Check that Ollama is running and the vault is available, then try again.'
