@@ -1,15 +1,31 @@
 # Obsidian
 
-Benson connects to Obsidian through [MCPVault](https://github.com/bitbonsai/mcpvault), an MCP server that reads and writes the Markdown files in a vault. Obsidian does not need to be open, and no plugin is needed. MCPVault also blocks access outside the vault and to hidden folders like `.obsidian`.
+Benson starts [MCPVault](https://github.com/bitbonsai/mcpvault) for `~/Documents/Benson Vault` and uses it to search and read Markdown notes. It runs with Electron's Node.js and stops when Benson quits. Obsidian does not need to be open and no plugin is required. To see the notes, choose **Open folder as vault** in Obsidian and select that folder.
 
-When Benson starts, it runs MCPVault on `~/Documents/Benson Vault` and connects to it. MCPVault stops when Benson quits. To see the notes, choose **Open folder as vault** in Obsidian and pick that folder.
+## Review and send
 
-MCPVault runs with the Node.js included in Electron, so there is nothing extra to install.
+1. Stop recording. Benson saves the audio and transcript before asking Qwen for a draft.
+2. Review the category, action, destination, note text, and explanation. Correct the destination or text if needed.
+3. Choose **Send** to create or append, or **Cancel** to discard the preview and keep the recording.
 
-After you stop recording, Benson saves the transcript and adds it to `Benson Inbox.md`. The **Send to Obsidian** button also lets you send an older recording or retry a failed send. Sending again adds the transcript again.
+Nothing is added to Obsidian before Send. There is no automatic Inbox send. An unsent History entry has **Prepare draft**; a failed generation has **Retry draft**. If Qwen asks for clarification, edit the Qwen prompt with the missing details and prepare again.
 
-Benson searches for matching notes and gives Qwen their paths and up to 3,000 characters from each note. It skips `Benson Inbox.md`, since that already contains the transcript. Qwen uses the prompt on screen to suggest a category and destination. This is a suggestion only; transcripts still go to the Inbox.
+Creating a note fails if the filename already exists. Appending fails if the note is missing. Permission errors are reported separately. Approved writes use exclusive creation or append-only file access because MCPVault's write tool does not provide those guarantees. Paths must stay inside the vault; hidden paths and symbolic links are rejected.
 
-Ollama must be running with `qwen3.5:4b` installed. Qwen replies are not saved or sent to Obsidian.
+Only a successful write updates the sent time in History. Repeated clicks and retries after a completed send cannot send that recording again. If saving the timestamp fails after writing, retrying in the same app session only retries the timestamp. A crash between writing and saving the timestamp is not recovered automatically; check the vault before trying again after a crash.
 
-Suggestions can be wrong, especially for unclear transcripts. Search matches words from the transcript, so different wording can miss a relevant note.
+Drafts and edits are not persisted. Cancel, switching recordings, changing the prompt, or restarting clears the preview. The saved audio and transcript remain available.
+
+## Qwen and search limits
+
+Run Ollama with `ollama serve`, then install the model with `ollama pull qwen3.5:4b` in another terminal. Benson calls the local service at `127.0.0.1:11434` using [structured outputs](https://docs.ollama.com/capabilities/structured-outputs). Empty or invalid replies do not become sendable drafts.
+
+Search supplies at most five matches and 3,000 characters per note, excluding `Benson Inbox.md` because older recordings may already be there. Word matching can miss relevant notes or include unrelated ones. Qwen can still choose a new note when an existing one fits, invent details, or phrase a proposal as though it was already saved. Only the app's successful Send confirms a write. Vague requests produced inconsistent guesses in testing, even with clarification instructions.
+
+## Checks run during catch-up on October 1
+
+- Grocery, project, new-topic, and unclear examples with local Qwen; searching and generating left the test vault unchanged.
+- The real Electron recording → Parakeet → Qwen → preview → Send flow using synthetic microphone audio, a separate database, and a test vault. This created a new note; it is not a real-microphone accuracy test.
+- Create and append, edited previews, Cancel, switching recordings, clarification, malformed replies, unavailable service, conflicts, missing targets, invalid paths, permission failures, retry, repeated clicks, and restart behavior. Recovery cases used controlled model replies or injected failures with real SQLite and test-vault writes.
+
+The build, TypeScript checks, ESLint, and changed-file formatting checks passed. The recording hotkey and broader MVP testing remain separate work.

@@ -10,19 +10,21 @@
 1. Record and save a short audio clip.
 2. Use Parakeet to turn the audio into a transcript.
 3. Use Qwen to choose an Obsidian note and prepare the content.
-4. Show everything in a simple form so the user can make changes.
-5. Ask for approval before sending anything to Obsidian.
-6. Store every capture in SQLite so the audio and transcript are still there if something goes wrong.
+4. Show a review preview with the action, destination, and note text. Allow destination and text edits.
+5. Send only after approval, or cancel and keep the saved recording.
+6. Keep the recording path, transcript, and successful sent time in SQLite. Store the audio separately.
 
-The MVP is finished when all six steps work end to end.
+The review flow is implemented and was tested during catch-up work on October 1. Audio and transcripts are saved before drafting; generation alone does not write notes. Drafts are held only in memory and disappear when switching recordings, changing the prompt, or restarting.
+
+The September 26–October 2 work remains the recording hotkey and broader MVP testing with real speech and more requests. One synthetic-speech flow does not establish everyday accuracy.
 
 ## Basic App
 
 - A small menu bar app for Mac
 - A **Record** button
 - A hotkey to start and stop recording
-- An editable transcript and note preview
-- A **Send to Obsidian** button
+- A saved transcript and editable note destination and text
+- **Send** and **Cancel** in the review preview
 - A simple history list
 - One Obsidian vault
 - The default microphone
@@ -37,21 +39,11 @@ The MVP is finished when all six steps work end to end.
 - **Destination:** Obsidian
 - **Connector:** [MCPVault](https://github.com/bitbonsai/mcpvault)
 
-## Ollama or llama.cpp
+## Local Qwen and Obsidian
 
-- **Ollama** is easier to set up and already supports Qwen3.5 4B, so it goes first.
-- **llama.cpp** gives the app more control over how the model runs, but it may take more setup.
-- Both can be tested with the same examples before choosing one for the final version.
+Benson currently uses Ollama with `qwen3.5:4b`. Run `ollama serve`, then `ollama pull qwen3.5:4b` in another terminal. Qwen returns a structured draft or clarification; Benson validates it before displaying it. It cannot execute tools.
 
-## Obsidian MCP
-
-The first choice is an existing Obsidian MCP that is simple and maintained. If Benson needs its own, it only needs to:
-
-- Find a note
-- Create a note
-- Add content to a note
-
-The user reviews every change before it is sent.
+MCPVault searches and reads notes. Approved writes use a small file-writing function because MCPVault's write tool cannot guarantee exclusive creation. Creating never replaces an existing filename, and appending requires an existing note. See [Obsidian](obsidian.md) for the review flow and limitations.
 
 ## Not Included in the MVP
 
