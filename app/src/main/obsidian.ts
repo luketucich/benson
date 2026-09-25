@@ -21,8 +21,8 @@ export async function closeVault(): Promise<void> {
   await client?.close()
 }
 
-// Benson only uses these MCPVault tools, so it cannot delete, move, or rename notes.
-const allowedTools = ['list_directory', 'search_notes', 'read_note', 'write_note']
+// Suggestions only need read access. Approved writes are handled in noteWriter.ts.
+const allowedTools = ['list_directory', 'search_notes', 'read_note']
 
 async function callTool(name: string, args: Record<string, unknown>): Promise<string> {
   if (!client) throw new Error('Benson is not connected to the Obsidian vault.')
@@ -56,21 +56,4 @@ export async function readNote(path: string): Promise<string> {
 
   const result = await callTool('read_note', { path })
   return JSON.parse(result).content
-}
-
-// Add text to the end of a note. MCPVault creates the note if it is missing.
-export async function appendToNote(notePath: string, text: string): Promise<void> {
-  if (!notePath.endsWith('.md')) throw new Error('Obsidian notes must end in .md.')
-
-  // MCPVault adds the text right after the last character, so start a new paragraph.
-  let content = text
-  try {
-    await callTool('read_note', { path: notePath })
-    content = `\n\n${text}`
-  } catch {
-    // The note does not exist yet.
-  }
-
-  // Always set the mode. Without it, MCPVault replaces the whole note.
-  await callTool('write_note', { path: notePath, content, mode: 'append' })
 }

@@ -13,10 +13,9 @@ import {
   saveTranscript,
   closeDatabase,
   getRecordings,
-  getRecording,
-  markRecordingSent
+  getRecording
 } from './database'
-import { connectToVault, closeVault, appendToNote } from './obsidian'
+import { connectToVault, closeVault } from './obsidian'
 import { suggestNote } from './noteSuggestion'
 import { saveApprovedDraft, setDraftVault } from './noteWriter'
 
@@ -142,16 +141,6 @@ app.whenReady().then(() => {
 
   ipcMain.handle('save-approved-draft', (_, id: number, draft: unknown) => {
     return saveApprovedDraft(id, draft)
-  })
-
-  // Add the recording's transcript to the end of the Benson Inbox note.
-  ipcMain.handle('send-to-obsidian', async (_, id: number) => {
-    const recording = getRecording(id)
-    if (!recording?.transcript) {
-      throw new Error('This recording has no transcript to send.')
-    }
-    await appendToNote('Benson Inbox.md', recording.transcript)
-    markRecordingSent(id)
   })
 
   createTray()

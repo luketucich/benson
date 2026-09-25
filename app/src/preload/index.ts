@@ -23,10 +23,6 @@ async function readRecording(id: number): Promise<ArrayBuffer> {
   return audio
 }
 
-async function sendToObsidian(id: number): Promise<void> {
-  await ipcRenderer.invoke('send-to-obsidian', id)
-}
-
 async function askQwen(prompt: string, transcript: string): Promise<NoteDraft> {
   const reply = await ipcRenderer.invoke('ask-qwen', prompt, transcript)
   return reply
@@ -42,7 +38,6 @@ contextBridge.exposeInMainWorld('api', {
   transcribeRecording: transcribeRecording,
   getRecordings: getRecordings,
   readRecording: readRecording,
-  sendToObsidian: sendToObsidian,
   askQwen: askQwen,
   saveApprovedDraft: saveApprovedDraft
 })

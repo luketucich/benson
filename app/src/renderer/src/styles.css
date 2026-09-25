@@ -12,10 +12,12 @@ body {
 }
 
 button,
+input,
 textarea {
   font: inherit;
 }
 
+input,
 textarea {
   display: block;
   box-sizing: border-box;

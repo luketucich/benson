@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SavedRecording } from '../../recording'
+import type { NoteDraft } from '../../noteDraft'
 
 function App(): React.JSX.Element {
   const [recording, setRecording] = useState(false)
@@ -15,7 +16,8 @@ function App(): React.JSX.Element {
   const [prompt, setPrompt] = useState(
     'Classify this transcript as Task, Idea, Reference, Journal, or Unclear. Suggest an existing note to add it to, or a new note if none fits. Prepare the note text and give one short reason. Ask a question if the request is unclear.'
   )
-  const [qwenReply, setQwenReply] = useState('')
+  const [draft, setDraft] = useState<NoteDraft | null>(null)
+  const sendingRef = useRef(false)
   const [qwenError, setQwenError] = useState('')
 
   // The recorder lives here so it survives between renders.
@@ -64,20 +66,7 @@ function App(): React.JSX.Element {
       setTranscript(text)
       if (!text.trim()) throw new Error('No speech was found in the recording.')
 
-      try {
-        const recordings = await window.api.getRecordings()
-        const saved = recordings.find((item) => item.audio_path === path)
-        if (!saved) throw new Error('Recording not found.')
-        await window.api.sendToObsidian(saved.id)
-        setSentMessage('Sent to Benson Inbox in Obsidian.')
-      } catch {
-        setError(
-          'Recording saved, but it could not be sent to Obsidian. Use Send to Obsidian to retry.'
-        )
-      }
-
-      // Still ask Qwen if sending to Obsidian fails.
-      await classifyTranscript(text)
+      await prepareDraft(text)
     } catch (error) {
       setError(`Could not save or transcribe the recording: ${String(error)}`)
     } finally {
@@ -86,39 +75,45 @@ function App(): React.JSX.Element {
     }
   }
 
-  async function classifyTranscript(text: string): Promise<void> {
-    setQwenReply('')
+  async function prepareDraft(text: string): Promise<void> {
+    setDraft(null)
     setQwenError('')
     try {
-      const draft = await window.api.askQwen(prompt, text)
-      setQwenReply(
-        `${draft.category}: ${draft.action}\n${draft.path}\n${draft.content}\n${draft.explanation}`
-      )
+      setDraft(await window.api.askQwen(prompt, text))
     } catch {
       setQwenError(
-        'Could not prepare a suggestion. Check that Ollama is running and the vault is available, then try again.'
+        'Could not prepare a draft. Check that Ollama is running and the vault is available, then try again.'
       )
     }
   }
 
-  async function sendToObsidian(id: number): Promise<void> {
+  async function sendDraft(): Promise<void> {
+    if (!selected || !draft || draft.action === 'clarify' || sendingRef.current) return
+    sendingRef.current = true
     setBusy(true)
     setError(null)
     setSentMessage('')
 
     try {
-      await window.api.sendToObsidian(id)
-      setSentMessage('Sent to Benson Inbox in Obsidian.')
+      await window.api.saveApprovedDraft(selected.id, draft)
+      setDraft(null)
+      setSentMessage(`Sent to ${draft.path}.`)
+      setHistory((items) =>
+        items.map((item) =>
+          item.id === selected.id ? { ...item, sent_at: new Date().toISOString() } : item
+        )
+      )
       await loadHistory()
-    } catch {
-      setError('Could not send the transcript to Obsidian. Try again.')
+    } catch (error) {
+      setError(`Could not send the draft: ${String(error)}`)
     } finally {
+      sendingRef.current = false
       setBusy(false)
     }
   }
 
   async function openRecording(recording: SavedRecording): Promise<void> {
-    setQwenReply('')
+    setDraft(null)
     setQwenError('')
     setBusy(true)
     setError(null)
@@ -139,7 +134,7 @@ function App(): React.JSX.Element {
   }
 
   async function startRecording(): Promise<void> {
-    setQwenReply('')
+    setDraft(null)
     setQwenError('')
     setError(null)
     setSentMessage('')
@@ -198,12 +193,12 @@ function App(): React.JSX.Element {
         disabled={busy || recording}
         onChange={(event) => {
           setPrompt(event.target.value)
-          setQwenReply('')
+          setDraft(null)
         }}
       />
       <p>
-        Stopping a recording saves it, sends the transcript to Obsidian, and asks Qwen to classify
-        it.
+        Stopping a recording saves the audio and transcript, then prepares a note draft. Nothing is
+        written to Obsidian until you press Send.
       </p>
       <button
         disabled={busy || (!recording && !prompt.trim())}
@@ -224,36 +219,76 @@ function App(): React.JSX.Element {
           ) : (
             !busy && <p>No transcript available.</p>
           )}
-          {selected?.transcript && (
-            <button disabled={busy || recording} onClick={() => sendToObsidian(selected.id)}>
-              Send to Obsidian
+          {selected?.transcript && !selected.sent_at && !draft && (
+            <button
+              disabled={busy || recording || !prompt.trim()}
+              onClick={async () => {
+                setBusy(true)
+                setError(null)
+                setSentMessage('')
+                await prepareDraft(selected.transcript!)
+                setBusy(false)
+              }}
+            >
+              {qwenError ? 'Retry draft' : 'Prepare draft'}
             </button>
           )}
           {sentMessage && <p role="status">{sentMessage}</p>}
-          {qwenError && (
-            <>
-              <p role="alert">{qwenError}</p>
+          {selected?.sent_at && <p>This recording has been sent to Obsidian.</p>}
+          {qwenError && <p role="alert">{qwenError}</p>}
+          {draft && (
+            <section aria-labelledby="draft-heading">
+              <h2 id="draft-heading">Review note draft</h2>
+              <p>Category: {draft.category}</p>
+              <p>{draft.explanation}</p>
+              {draft.action === 'clarify' ? (
+                <p>Clarify your request in the Qwen prompt, then prepare another draft.</p>
+              ) : (
+                <>
+                  <p>
+                    Action: {draft.action === 'create' ? 'Create a new note' : 'Append to a note'}
+                  </p>
+                  <label htmlFor="note-path">Destination</label>
+                  <input
+                    id="note-path"
+                    value={draft.path}
+                    disabled={busy}
+                    onChange={(event) => setDraft({ ...draft, path: event.target.value })}
+                  />
+                  <label htmlFor="note-content">Note text</label>
+                  <textarea
+                    id="note-content"
+                    rows={6}
+                    value={draft.content}
+                    disabled={busy}
+                    onChange={(event) => setDraft({ ...draft, content: event.target.value })}
+                  />
+                  <button
+                    disabled={
+                      busy ||
+                      !selected ||
+                      !!selected.sent_at ||
+                      !draft.path.trim() ||
+                      !draft.content.trim()
+                    }
+                    onClick={sendDraft}
+                  >
+                    Send
+                  </button>{' '}
+                </>
+              )}
               <button
-                disabled={busy || recording || !prompt.trim()}
-                onClick={async () => {
-                  if (!transcript) return
-                  setBusy(true)
-                  await classifyTranscript(transcript)
-                  setBusy(false)
+                disabled={busy}
+                onClick={() => {
+                  setDraft(null)
+                  setError(null)
+                  setSentMessage('Draft cancelled. Your recording is still saved.')
                 }}
               >
-                Retry Qwen
+                Cancel
               </button>
-            </>
+            </section>
           )}
-          <div aria-live="polite">
-            {qwenReply && (
-              <>
-                <h2>Qwen reply</h2>
-                <p className="transcript">{qwenReply}</p>
-              </>
-            )}
-          </div>
         </section>
       )}
 
