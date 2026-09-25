@@ -10,13 +10,13 @@
 1. Record and save a short audio clip.
 2. Use Parakeet to turn the audio into a transcript.
 3. Use Qwen to choose an Obsidian note and prepare the content.
-4. Show a review preview with the action, destination, and note text. Allow destination and text edits.
+4. Show the action, destination, and note text in a preview so the user can make changes.
 5. Send only after approval, or cancel and keep the saved recording.
 6. Keep the recording path, transcript, and successful sent time in SQLite. Store the audio separately.
 
-The review flow is implemented and was tested during catch-up work on October 1. Audio and transcripts are saved before drafting; generation alone does not write notes. Drafts are held only in memory and disappear when switching recordings, changing the prompt, or restarting.
+The review preview is working. I finished and tested it on October 1 while catching up. Benson saves the audio and transcript first and waits for Send before writing a note. Drafts are not saved when switching recordings, changing the prompt, or closing the app.
 
-The September 26–October 2 work remains the recording hotkey and broader MVP testing with real speech and more requests. One synthetic-speech flow does not establish everyday accuracy.
+The recording hotkey and more testing are still left for September 26-October 2. The flow worked with computer-generated speech, but I still need to try more of my own recordings.
 
 ## Basic App
 
@@ -41,9 +41,9 @@ The September 26–October 2 work remains the recording hotkey and broader MVP t
 
 ## Local Qwen and Obsidian
 
-Benson currently uses Ollama with `qwen3.5:4b`. Run `ollama serve`, then `ollama pull qwen3.5:4b` in another terminal. Qwen returns a structured draft or clarification; Benson validates it before displaying it. It cannot execute tools.
+Benson currently uses Ollama with `qwen3.5:4b`. Run `ollama serve`, then `ollama pull qwen3.5:4b` in another terminal. Qwen returns the action, path, text, and a short explanation, or asks for clarification. Benson checks the reply before showing it. Qwen cannot run tools or write notes.
 
-MCPVault searches and reads notes. Approved writes use a small file-writing function because MCPVault's write tool cannot guarantee exclusive creation. Creating never replaces an existing filename, and appending requires an existing note. See [Obsidian](obsidian.md) for the review flow and limitations.
+MCPVault searches and reads notes. A small write function saves approved drafts because MCPVault's write tool can replace existing files. Creating a note fails if the name is taken. Appending requires an existing note. See [Obsidian](obsidian.md) for the details.
 
 ## Not Included in the MVP
 

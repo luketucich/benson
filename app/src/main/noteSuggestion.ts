@@ -21,7 +21,7 @@ export async function suggestNote(prompt: string, transcript: string): Promise<N
   const notes: { path: string; content: string }[] = []
 
   for (const match of matches.slice(0, 5)) {
-    // The Inbox already contains the transcript, so skip it as a suggestion.
+    // Older recordings may already be in the Inbox, so leave it out of suggestions.
     if (match.p === 'Benson Inbox.md') continue
     const content = await readNote(match.p)
     notes.push({ path: match.p, content: content.slice(0, 3000) })

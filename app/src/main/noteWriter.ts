@@ -34,8 +34,8 @@ async function notePath(draft: NoteDraft): Promise<string> {
 async function writeDraft(draft: NoteDraft): Promise<void> {
   try {
     const path = await notePath(draft)
-    // MCPVault has no exclusive create and can overwrite after a failed read.
-    // These flags reject existing create targets and missing append targets.
+    // MCPVault can replace a note when a read fails.
+    // These flags only create new files or append to files that already exist.
     const flags =
       draft.action === 'create'
         ? constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW
@@ -72,7 +72,7 @@ export async function saveApprovedDraft(id: number, value: unknown): Promise<voi
 
   sending.add(id)
   try {
-    // If saving the timestamp fails, a retry in this session must not write twice.
+    // Remember the write so retrying a failed timestamp save does not add the text again.
     if (!written.has(id)) {
       await writeDraft(draft)
       written.add(id)

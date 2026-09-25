@@ -8,6 +8,6 @@ The database is `benson.sqlite` in `~/Library/Application Support/benson/`. SQLi
 
 History shows saved recordings, newest first. Select one to play the audio and read its transcript. Older audio files have not been added to the database yet.
 
-After a successful send to Obsidian, Benson saves the time and shows it in History. A recording with a saved sent time cannot be sent again from the preview. Sends made before sent tracking was added were not tracked.
+After a successful send to Obsidian, Benson saves the time and shows it in History. A recording marked as sent cannot be sent again. Older sends made before this feature were not tracked.
 
-Drafts and preview edits live only in memory. Cancel, switching recordings, changing the prompt, and restarting discard the draft without removing the saved audio or transcript.
+Drafts and edits are not saved. Cancel, switching recordings, changing the prompt, or closing the app clears the draft. The saved audio and transcript stay in History.

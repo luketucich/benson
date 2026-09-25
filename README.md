@@ -4,7 +4,7 @@ Benson is a desktop app for saving a quick thought without leaving what you are 
 
 ## Run locally
 
-Use an Apple Silicon Mac, Node.js, and the [transcription setup](docs/transcription.md). Install [Ollama](https://ollama.com), start it with `ollama serve`, then download the model in another terminal:
+Use an Apple Silicon Mac, Node.js, and the [transcription setup](docs/transcription.md). Install [Ollama](https://ollama.com), start it with `ollama serve`, then run these commands from the Benson folder in another terminal:
 
 ```sh
 ollama pull qwen3.5:4b
@@ -13,9 +13,9 @@ npm install
 npm run dev
 ```
 
-Stop a recording to save the audio and transcript and prepare a draft. Review its action, destination, and note text; edit the destination or text if needed, then choose **Send** or **Cancel**. Obsidian writing waits for Send. Saved recordings remain in History if drafting or sending fails.
+Stop a recording to save the audio and transcript. Qwen then prepares a note for review. Check where it will go and what it will say, make any changes, then choose **Send** or **Cancel**. Nothing is added to Obsidian until Send. The recording stays in History if something fails.
 
-The preview is implemented. Drafts and preview edits are not saved across restarts or recording changes. Qwen can guess incorrectly and search can miss relevant notes; see [Obsidian](docs/obsidian.md) for limits and test coverage. The recording hotkey and broader MVP testing remain separate September 26–October 2 work.
+Drafts are not saved when you close the app or switch recordings. Qwen can still get the note wrong. See [Obsidian](docs/obsidian.md) for what works and what still needs testing. The recording hotkey and more MVP testing are still planned for September 26-October 2.
 
 ## Documents
 
