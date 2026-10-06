@@ -6,6 +6,10 @@
   "author": "Luke Tucich",
   "homepage": "https://electron-vite.org",
   "scripts": {
+    "build:hotkey": "node scripts/build-hotkey.mjs",
+    "predev": "npm run build:hotkey",
+    "prebuild": "npm run build:hotkey",
+    "prebuild:mac": "npm run build:hotkey",
     "format": "prettier --write .",
     "lint": "eslint --cache .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
