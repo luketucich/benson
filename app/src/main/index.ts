@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, Tray, Menu, nativeImage, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, Tray, Menu, nativeImage, ipcMain, powerMonitor } from 'electron'
 import { join } from 'path'
 import { mkdirSync, writeFileSync } from 'fs'
 import { readFile } from 'fs/promises'
@@ -18,23 +18,47 @@ import {
 import { connectToVault, closeVault } from './obsidian'
 import { suggestNote } from './noteSuggestion'
 import { saveApprovedDraft, setDraftVault } from './noteWriter'
+import {
+  setupRecordingShortcut,
+  getShortcutState,
+  beginShortcutCapture,
+  cancelShortcutCapture,
+  captureShortcutInput,
+  releaseRecordingShortcut,
+  closeRecordingShortcut
+} from './recordingShortcut'
+import type { RecordingActivity } from '../shortcut'
 
 // Allow us to wait for a program to finish using await.
 const runProgram = promisify(execFile)
 
 // Kept at module scope so the tray is not garbage collected.
 let tray: Tray | null = null
+let mainWindow: BrowserWindow | null = null
+let quitting = false
+let activity: RecordingActivity = 'idle'
+
+function showWindow(): void {
+  if (!mainWindow || mainWindow.isDestroyed()) return
+  if (mainWindow.isMinimized()) mainWindow.restore()
+  mainWindow.show()
+  mainWindow.focus()
+}
 
 function createTray(): void {
   tray = new Tray(nativeImage.createFromPath(trayIcon))
   tray.setToolTip('Benson')
 
-  const menu = Menu.buildFromTemplate([{ label: 'Quit Benson', role: 'quit' }])
+  const menu = Menu.buildFromTemplate([
+    { label: 'Open Benson', click: showWindow },
+    { label: 'Quit Benson', role: 'quit' }
+  ])
+  tray.on('click', showWindow)
   tray.on('right-click', () => tray?.popUpContextMenu(menu))
 }
 
 function createWindow(): void {
-  const mainWindow = new BrowserWindow({
+  const window = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -42,24 +66,38 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
+      backgroundThrottling: false,
       sandbox: false
     }
   })
+  mainWindow = window
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+  window.on('ready-to-show', () => {
+    window.show()
   })
+  // Keep the recorder alive when the window is closed. The tray can reopen it.
+  window.on('close', (event) => {
+    if (!quitting) {
+      event.preventDefault()
+      window.hide()
+      void cancelShortcutCapture()
+    }
+  })
+  window.on('blur', () => {
+    void cancelShortcutCapture()
+  })
+  window.webContents.on('before-input-event', captureShortcutInput)
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
+  window.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
 
   // Use the development server while coding, or the built page otherwise.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    window.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    window.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
 
@@ -143,16 +181,50 @@ app.whenReady().then(() => {
     return saveApprovedDraft(id, draft)
   })
 
+  ipcMain.handle('get-recording-shortcut', getShortcutState)
+  ipcMain.handle('begin-shortcut-capture', () => {
+    if (activity !== 'idle') throw new Error('Finish your recording before changing the shortcut.')
+    return beginShortcutCapture()
+  })
+  ipcMain.handle('cancel-shortcut-capture', cancelShortcutCapture)
+  ipcMain.on('recording-activity', (_, next: RecordingActivity) => {
+    if (!['idle', 'starting', 'recording', 'processing'].includes(next)) return
+    activity = next
+    const title = next === 'recording' ? 'Recording…' : next === 'processing' ? 'Working…' : ''
+    if (process.platform === 'darwin') tray?.setTitle(title)
+    tray?.setToolTip(title ? `Benson — ${title}` : 'Benson')
+  })
+  ipcMain.on('show-review', showWindow)
+
   createTray()
   createWindow()
+  void setupRecordingShortcut(
+    dataFolder,
+    (state) => {
+      if (mainWindow && !mainWindow.isDestroyed())
+        mainWindow.webContents.send('shortcut-state', state)
+    },
+    (down) => {
+      if (mainWindow && !mainWindow.isDestroyed())
+        mainWindow.webContents.send('recording-shortcut', down)
+    }
+  )
+  powerMonitor.on('suspend', releaseRecordingShortcut)
+  powerMonitor.on('lock-screen', releaseRecordingShortcut)
 
   app.on('activate', function () {
     // Reopen the window when the Dock icon is clicked.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    else showWindow()
   })
 })
 
+app.on('before-quit', () => {
+  quitting = true
+})
+
 app.on('will-quit', () => {
+  closeRecordingShortcut()
   closeDatabase()
   closeVault()
 })

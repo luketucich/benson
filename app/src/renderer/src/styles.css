@@ -48,3 +48,33 @@ audio {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.shortcut-settings {
+  border: 1px solid #555;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+}
+
+.shortcut-help {
+  margin: 8px 0 0;
+  color: #bbb;
+  font-size: 14px;
+  max-width: 70ch;
+}
+
+.shortcut-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.shortcut-controls p {
+  margin: 8px 0;
+}
+
+button:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 3px;
+}

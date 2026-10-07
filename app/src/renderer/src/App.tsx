@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SavedRecording } from '../../recording'
 import type { NoteDraft } from '../../noteDraft'
+import type { ShortcutState } from '../../shortcut'
 
 function App(): React.JSX.Element {
   const [recording, setRecording] = useState(false)
@@ -19,12 +20,34 @@ function App(): React.JSX.Element {
   const [draft, setDraft] = useState<NoteDraft | null>(null)
   const sendingRef = useRef(false)
   const [qwenError, setQwenError] = useState('')
+  const [shortcut, setShortcut] = useState<ShortcutState>({
+    label: 'Not set',
+    listening: false,
+    saving: false,
+    error: null
+  })
 
   // The recorder lives here so it survives between renders.
   const recorderRef = useRef<MediaRecorder | null>(null)
+  const busyRef = useRef(false)
+  const waitingForMicRef = useRef(false)
+  const shortcutHeldRef = useRef(false)
+  const startedByShortcutRef = useRef(false)
+  const stopRequestedRef = useRef(false)
+  const shortcutHandlerRef = useRef<(down: boolean) => void>(() => {})
+
+  function setWorking(value: boolean): void {
+    // Update this right away so quick key presses cannot start two recordings.
+    busyRef.current = value
+    setBusy(value)
+  }
 
   // Find the saved entry for the recording on screen.
   const selected = history.find((item) => item.audio_path === savedPath)
+  const changingShortcut = shortcut.listening || shortcut.saving
+  let shortcutButtonText = shortcut.label === 'Not set' ? 'Set shortcut' : 'Change shortcut'
+  if (shortcut.listening) shortcutButtonText = 'Cancel'
+  if (shortcut.saving) shortcutButtonText = 'Saving…'
 
   function loadHistory(): Promise<void> {
     return window.api
@@ -46,13 +69,60 @@ function App(): React.JSX.Element {
   }, [])
 
   useEffect(() => {
+    let mounted = true
+    window.api
+      .getRecordingShortcut()
+      .then((state) => {
+        if (mounted) setShortcut(state)
+      })
+      .catch(() => {
+        if (mounted)
+          setShortcut((state) => ({ ...state, error: 'Could not load the recording shortcut.' }))
+      })
+    const offState = window.api.onShortcutState(setShortcut)
+    const offShortcut = window.api.onRecordingShortcut((down) => shortcutHandlerRef.current(down))
+    return () => {
+      mounted = false
+      offState()
+      offShortcut()
+      const recorder = recorderRef.current
+      if (recorder) {
+        recorder.onstop = null
+        if (recorder.state === 'recording') recorder.stop()
+        recorder.stream.getTracks().forEach((track) => track.stop())
+      }
+    }
+  }, [])
+
+  // Use the latest prompt without adding another shortcut listener.
+  useEffect(() => {
+    shortcutHandlerRef.current = (down) => {
+      shortcutHeldRef.current = down
+      if (down) {
+        if (busyRef.current || recorderRef.current || changingShortcut) return
+        if (!prompt.trim()) {
+          setError('Enter a Qwen prompt before recording.')
+          window.api.showReview()
+          return
+        }
+        void startRecording(true)
+      } else if (startedByShortcutRef.current) {
+        stopRecording()
+      }
+    }
+  })
+
+  useEffect(() => {
     return () => {
       if (audioUrl) URL.revokeObjectURL(audioUrl)
     }
   }, [audioUrl])
 
   async function processRecording(blob: Blob): Promise<void> {
-    setBusy(true)
+    const showReview = startedByShortcutRef.current
+    startedByShortcutRef.current = false
+    setWorking(true)
+    window.api.setRecordingActivity('processing')
     setTranscript(null)
     setSavedPath(null)
     setAudioUrl(URL.createObjectURL(blob))
@@ -71,7 +141,9 @@ function App(): React.JSX.Element {
       setError(`Could not save or transcribe the recording: ${String(error)}`)
     } finally {
       await loadHistory()
-      setBusy(false)
+      setWorking(false)
+      window.api.setRecordingActivity('idle')
+      if (showReview) window.api.showReview()
     }
   }
 
@@ -90,7 +162,7 @@ function App(): React.JSX.Element {
   async function sendDraft(): Promise<void> {
     if (!selected || !draft || draft.action === 'clarify' || sendingRef.current) return
     sendingRef.current = true
-    setBusy(true)
+    setWorking(true)
     setError(null)
     setSentMessage('')
 
@@ -108,14 +180,14 @@ function App(): React.JSX.Element {
       setError(`Could not send the draft: ${String(error)}`)
     } finally {
       sendingRef.current = false
-      setBusy(false)
+      setWorking(false)
     }
   }
 
   async function openRecording(recording: SavedRecording): Promise<void> {
     setDraft(null)
     setQwenError('')
-    setBusy(true)
+    setWorking(true)
     setError(null)
     setSentMessage('')
     setSavedPath(recording.audio_path)
@@ -129,16 +201,21 @@ function App(): React.JSX.Element {
     } catch {
       setError('Could not open the audio. The file may have been moved or removed.')
     } finally {
-      setBusy(false)
+      setWorking(false)
     }
   }
 
-  async function startRecording(): Promise<void> {
+  async function startRecording(fromShortcut = false): Promise<void> {
+    if (busyRef.current || waitingForMicRef.current || recorderRef.current) return
+    waitingForMicRef.current = true
+    startedByShortcutRef.current = fromShortcut
+    stopRequestedRef.current = false
     setDraft(null)
     setQwenError('')
     setError(null)
     setSentMessage('')
-    setBusy(true)
+    setWorking(true)
+    window.api.setRecordingActivity('starting')
     // Close the old player before recording a new clip.
     setAudioUrl(null)
     setSavedPath(null)
@@ -147,8 +224,16 @@ function App(): React.JSX.Element {
     try {
       // Ask for the mic. Mac will ask for permission the first time.
       mic = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // The key may be released while the microphone permission window is open.
+      if (stopRequestedRef.current || (fromShortcut && !shortcutHeldRef.current)) {
+        mic.getTracks().forEach((track) => track.stop())
+        startedByShortcutRef.current = false
+        window.api.setRecordingActivity('idle')
+        return
+      }
       const recorder = new MediaRecorder(mic)
       const chunks: Blob[] = []
+      let failed = false
 
       // Audio comes in pieces while recording, so collect them.
       recorder.ondataavailable = (event) => {
@@ -160,49 +245,97 @@ function App(): React.JSX.Element {
         // Turn the mic off now that we are done with it.
         recorder.stream.getTracks().forEach((track) => track.stop())
         recorderRef.current = null
+        if (failed) return
 
         const blob = new Blob(chunks, { type: 'audio/webm' })
         await processRecording(blob)
       }
 
+      recorder.onerror = () => {
+        failed = true
+        recorder.stream.getTracks().forEach((track) => track.stop())
+        recorderRef.current = null
+        startedByShortcutRef.current = false
+        setRecording(false)
+        setWorking(false)
+        setError('Microphone stopped. Try recording again.')
+        window.api.setRecordingActivity('idle')
+        if (fromShortcut) window.api.showReview()
+      }
+
       recorder.start()
       recorderRef.current = recorder
       setRecording(true)
+      window.api.setRecordingActivity('recording')
     } catch (error) {
       mic?.getTracks().forEach((track) => track.stop())
+      recorderRef.current = null
+      startedByShortcutRef.current = false
       setError(`Could not start recording: ${String(error)}`)
+      window.api.setRecordingActivity('idle')
+      if (fromShortcut) window.api.showReview()
     } finally {
-      setBusy(false)
+      waitingForMicRef.current = false
+      setWorking(false)
     }
   }
 
   function stopRecording(): void {
-    setBusy(true)
-    recorderRef.current?.stop()
+    stopRequestedRef.current = true
+    if (waitingForMicRef.current || recorderRef.current?.state !== 'recording') return
+    setWorking(true)
+    window.api.setRecordingActivity('processing')
+    recorderRef.current.stop()
     setRecording(false)
+  }
+
+  function toggleRecording(): void {
+    if (recording) stopRecording()
+    else void startRecording()
+  }
+
+  async function changeShortcut(): Promise<void> {
+    try {
+      if (shortcut.listening) await window.api.cancelShortcutCapture()
+      else await window.api.beginShortcutCapture()
+    } catch (error) {
+      setShortcut((state) => ({ ...state, error: String(error) }))
+    }
   }
 
   return (
     <main>
       <h1>Benson</h1>
+      <section aria-label="Recording shortcut" className="shortcut-settings">
+        <div className="shortcut-controls">
+          <strong>Shortcut</strong>
+          <p role="status">{shortcut.listening ? 'Press keys…' : shortcut.label}</p>
+          <button disabled={busy || recording || shortcut.saving} onClick={changeShortcut}>
+            {shortcutButtonText}
+          </button>
+        </div>
+        <p className="shortcut-help">
+          {shortcut.listening
+            ? 'Press a shortcut. Esc cancels.'
+            : 'Hold to record. Release to finish.'}
+        </p>
+        {shortcut.error && <p role="alert">{shortcut.error}</p>}
+      </section>
       <label htmlFor="qwen-prompt">Qwen prompt</label>
       <textarea
         id="qwen-prompt"
         rows={4}
         value={prompt}
-        disabled={busy || recording}
+        disabled={busy || recording || changingShortcut}
         onChange={(event) => {
           setPrompt(event.target.value)
           setDraft(null)
         }}
       />
-      <p>
-        Stopping a recording saves the audio and transcript, then prepares a note draft. Nothing is
-        written to Obsidian until you press Send.
-      </p>
+      <p>Review your note, then Send to Obsidian.</p>
       <button
-        disabled={busy || (!recording && !prompt.trim())}
-        onClick={recording ? stopRecording : startRecording}
+        disabled={busy || changingShortcut || (!recording && !prompt.trim())}
+        onClick={toggleRecording}
       >
         {recording ? 'Stop recording' : 'Record'}
       </button>
@@ -223,11 +356,11 @@ function App(): React.JSX.Element {
             <button
               disabled={busy || recording || !prompt.trim()}
               onClick={async () => {
-                setBusy(true)
+                setWorking(true)
                 setError(null)
                 setSentMessage('')
                 await prepareDraft(selected.transcript!)
-                setBusy(false)
+                setWorking(false)
               }}
             >
               {qwenError ? 'Retry draft' : 'Prepare draft'}
