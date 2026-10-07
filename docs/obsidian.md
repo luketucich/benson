@@ -14,7 +14,7 @@ Creating a note fails if the filename is taken. Appending fails if the note is m
 
 History shows the sent time after a successful write. A recording marked as sent cannot be sent again. If the note is saved but its timestamp fails, a retry in the same app session only saves the timestamp. If the app crashes between those steps, check the vault before trying again.
 
-Drafts and edits are not saved. Cancel, switching recordings, changing the prompt, or closing the app clears the preview. The audio and transcript stay in History.
+Drafts and edits are not saved. Cancel, switching recordings, changing the prompt, or quitting the app clears the preview. Closing the window hides it and keeps Benson running. The audio and transcript stay in History.
 
 ## Qwen
 
@@ -28,4 +28,4 @@ I tested grocery, project, new-topic, and unclear requests on October 1. Searchi
 
 I also checked creating and appending, edits, Cancel, switching recordings, errors, retry, repeated clicks, and reopening the app. These checks used a separate database and vault. Some used fixed model replies or forced errors to check recovery. They do not prove Qwen's accuracy.
 
-The build, lint, and formatting checks passed. The recording hotkey and more testing with my own speech are still left to do.
+Build, lint, and formatting checks passed. More testing with my own voice is still needed. See the [recording shortcut](../README.md#recording-shortcut).

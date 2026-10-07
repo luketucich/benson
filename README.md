@@ -15,7 +15,15 @@ npm run dev
 
 Stop a recording to save the audio and transcript. Qwen then prepares a note for review. Check where it will go and what it will say, make any changes, then choose **Send** or **Cancel**. Nothing is added to Obsidian until Send. The recording stays in History if something fails.
 
-Drafts are not saved when you close the app or switch recordings. Qwen can still get the note wrong. See [Obsidian](docs/obsidian.md) for what works and what still needs testing. The recording hotkey and more MVP testing are still planned for September 26-October 2.
+Drafts are not saved when you switch recordings or quit the app. Qwen can still get the note wrong. See [Obsidian](docs/obsidian.md) for what works and what still needs testing.
+
+## Recording shortcut
+
+Click **Set shortcut** and press a combination such as **Control + Option + Space**. Benson remembers it. Use **Change shortcut** to replace it, or Escape to cancel.
+
+Hold it from any app to record. Release to prepare a draft. The menu bar shows **Recording…** or **Working…**, and the review window opens when it finishes. Nothing is sent until **Send**.
+
+Closing the window keeps Benson running. Click its menu bar icon to reopen it, or choose **Quit Benson** to stop it. The shortcut works on Mac only. Development builds need Apple's Command Line Tools.
 
 ## Documents
 

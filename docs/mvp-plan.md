@@ -16,7 +16,7 @@
 
 The review preview is working. I finished and tested it on October 1 while catching up. Benson saves the audio and transcript first and waits for Send before writing a note. Drafts are not saved when switching recordings, changing the prompt, or closing the app.
 
-The recording hotkey and more testing are still left for September 26-October 2. The flow worked with computer-generated speech, but I still need to try more of my own recordings.
+The recording shortcut is done. Hold it from any app to record. Release to prepare a draft. More testing with my own voice is still planned.
 
 ## Basic App
 
@@ -58,6 +58,7 @@ These would add setup, security, and edge-case work without making the first dem
 
 - Google Calendar events
 - A better-looking application window
+- A small floating window for the review
 - Sounds and small animations
 - More settings
 - Windows support

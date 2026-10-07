@@ -10,4 +10,4 @@ History shows saved recordings, newest first. Select one to play the audio and r
 
 After a successful send to Obsidian, Benson saves the time and shows it in History. A recording marked as sent cannot be sent again. Older sends made before this feature were not tracked.
 
-Drafts and edits are not saved. Cancel, switching recordings, changing the prompt, or closing the app clears the draft. The saved audio and transcript stay in History.
+Drafts and edits are not saved. Cancel, switching recordings, changing the prompt, or quitting the app clears the draft. Closing the window hides it and keeps Benson running. The saved audio and transcript stay in History.
