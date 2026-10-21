@@ -8,7 +8,7 @@ Benson uses [MCPVault](https://github.com/bitbonsai/mcpvault) to search and read
 2. Check the action, destination, and note text. Edit the destination or text if needed.
 3. Choose **Send** to save the note or **Cancel** to keep just the recording.
 
-There is no automatic Inbox send anymore. Select an unsent recording in History and choose **Prepare draft** to try again. If Qwen needs more detail, add it to the Qwen prompt and prepare another draft.
+There is no automatic Inbox send anymore. Select an unsent recording in History and choose **Prepare draft** to try again. If Qwen needs more detail, add it to your instructions and prepare another draft.
 
 Creating a note fails if the filename is taken. Appending fails if the note is missing. Permission errors are shown separately. A small write function handles this because MCPVault's write tool can replace existing files. Hidden paths, symbolic links, and paths outside the vault are blocked.
 

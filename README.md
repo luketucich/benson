@@ -36,10 +36,13 @@ Closing the window keeps Benson running. Click its menu bar icon to reopen it, o
 
 ## Code Layout
 
-- `app/src/main/`: Window, recording files, SQLite storage, and the Obsidian connection.
+Each file does one job, so you can read just the part you need.
+
+- `app/src/main/`: The Electron side. `index.ts` starts and stops Benson, `ipc.ts` lists every request the screen can make, and `window.ts`, `tray.ts`, `recordingFiles.ts`, `database.ts`, `obsidian.ts`, `qwen.ts`, `noteSuggestion.ts` and `noteWriter.ts` each handle one piece.
+- `app/src/main/recordingShortcut/`: Watches for the shortcut. `keys.ts` turns a key into Mac numbers, `helper.ts` runs the small program in `app/native/`, and `index.ts` keeps the settings.
 - `app/src/preload/`: Functions the screen can call through `window.api`.
-- `app/src/renderer/src/`: The React screen and `styles.css`.
-- `app/src/recording.ts`: The fields shared by saved recordings.
+- `app/src/renderer/src/`: The React screen. `hooks/` holds the recorder, history and shortcut, `components/` holds the pieces you see, and `App.tsx` puts them together.
+- `app/src/*.ts`: Types both sides share.
 - `scripts/transcribe.py`: The Python script that runs Parakeet.
 
 ## Timeline
