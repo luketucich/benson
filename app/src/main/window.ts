@@ -1,7 +1,6 @@
 import { BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
 import { cancelShortcutCapture, captureShortcutInput } from './recordingShortcut'
 
 let mainWindow: BrowserWindow | null = null
@@ -33,7 +32,6 @@ export function createWindow(): void {
     height: 670,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       backgroundThrottling: false,
