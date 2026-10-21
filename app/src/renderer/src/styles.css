@@ -17,6 +17,34 @@ textarea {
   font: inherit;
 }
 
+button {
+  padding: 6px 12px;
+  border: 1px solid #555;
+  border-radius: 6px;
+  background: #2a2a30;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #33333a;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+h1 {
+  margin: 0 0 20px;
+  font-size: 28px;
+}
+
+h2 {
+  margin: 20px 0 8px;
+  font-size: 18px;
+}
+
 input,
 textarea {
   display: block;
@@ -52,7 +80,7 @@ audio {
 .shortcut-settings {
   border: 1px solid #555;
   border-radius: 8px;
-  margin-bottom: 24px;
+  margin: 24px 0;
   padding: 12px 16px;
 }
 

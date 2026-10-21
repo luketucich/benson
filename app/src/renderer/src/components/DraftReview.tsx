@@ -45,11 +45,11 @@ function DraftFields({
 export function DraftReview({ draft, onCancel, ...fields }: Props): React.JSX.Element {
   return (
     <section aria-labelledby="draft-heading">
-      <h2 id="draft-heading">Review note draft</h2>
+      <h2 id="draft-heading">Review note</h2>
       <p>Category: {draft.category}</p>
       <p>{draft.explanation}</p>
       {draft.action === 'clarify' ? (
-        <p>Clarify your request in the Qwen prompt, then prepare another draft.</p>
+        <p>Add more detail to your instructions, then prepare another draft.</p>
       ) : (
         <DraftFields draft={draft} {...fields} />
       )}

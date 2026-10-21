@@ -54,7 +54,7 @@ function App(): React.JSX.Element {
     }
     if (busy || recorder.recording || shortcut.changing) return
     if (!prompt.trim()) {
-      setError('Enter a Qwen prompt before recording.')
+      setError('Add instructions before recording.')
       window.api.showReview()
       return
     }
@@ -151,16 +151,9 @@ function App(): React.JSX.Element {
     <main>
       <h1>Benson</h1>
 
-      <ShortcutSettings
-        state={shortcut.state}
-        buttonText={shortcut.buttonText}
-        disabled={busy || recorder.recording || shortcut.state.saving}
-        onChange={shortcut.change}
-      />
-
-      <label htmlFor="qwen-prompt">Qwen prompt</label>
+      <label htmlFor="instructions">Instructions</label>
       <textarea
-        id="qwen-prompt"
+        id="instructions"
         rows={4}
         value={prompt}
         disabled={busy || recorder.recording || shortcut.changing}
@@ -170,7 +163,6 @@ function App(): React.JSX.Element {
         }}
       />
 
-      <p>Review your note, then Send to Obsidian.</p>
       <button
         disabled={busy || shortcut.changing || (!recorder.recording && !prompt.trim())}
         onClick={toggleRecording}
@@ -180,6 +172,13 @@ function App(): React.JSX.Element {
       {recorder.recording && <Status>Recording…</Status>}
       {busy && <Status>Working…</Status>}
       {error && <Alert>{error}</Alert>}
+
+      <ShortcutSettings
+        state={shortcut.state}
+        buttonText={shortcut.buttonText}
+        disabled={busy || recorder.recording || shortcut.state.saving}
+        onChange={shortcut.change}
+      />
 
       {(audioUrl || savedPath) && (
         <SelectedRecording

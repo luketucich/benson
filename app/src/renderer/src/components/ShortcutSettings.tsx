@@ -24,7 +24,9 @@ export function ShortcutSettings({
         </button>
       </div>
       <p className="shortcut-help">
-        {state.listening ? 'Press a shortcut. Esc cancels.' : 'Hold to record. Release to finish.'}
+        {state.listening
+          ? 'Press a shortcut. Esc cancels.'
+          : 'Hold to record from any app. Release to finish.'}
       </p>
       {state.error && <Alert>{state.error}</Alert>}
     </section>
