@@ -47,7 +47,13 @@ Each file does one job, so you can read just the part you need.
 
 ## Timeline
 
-The goal is to finish the full MVP by **Friday, October 2, 2026**. Weekly meetings with my professor happen on Wednesdays, and a weekly update goes out every Friday.
+Weekly meetings with my professor happen on Wednesdays, and a weekly update goes out every Friday.
+
+### Where things stand
+
+The MVP is built. Recording, transcription, the Qwen draft, the review step, Obsidian, and the recording shortcut all work. The goal was **Friday, October 2, 2026**. The shortcut landed on October 6 and 7, a few days late.
+
+Two things are still open: testing the whole flow with my own voice, and writing up the MVP. Both are planned for October 24-30.
 
 | Week                   | Main goal                                                                                                                                                |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -58,8 +64,8 @@ The goal is to finish the full MVP by **Friday, October 2, 2026**. Weekly meetin
 | September 26-October 2 | Add the recording hotkey, test the full MVP more broadly, and resolve remaining issues.                                                                  |
 | October 3-9            | Catch up on anything unfinished and write up the MVP before the Korea trip.                                                                              |
 | October 10-16          | No project work planned. Korea trip and UNC Charlotte fall break (October 12-13).                                                                        |
-| October 17-23          | Fix anything noticed after the break and try creating a reviewed Google Calendar event. Save it for later if it takes too long.                          |
-| October 24-30          | Improve the main window, menu bar, history, loading screens, and error messages.                                                                         |
+| October 17-23          | Clean up the code, split it into smaller files, and simplify the screen.                                                                                 |
+| October 24-30          | Test the MVP with my own recordings and write it up. Then improve the main window, menu bar, history, loading screens, and error messages.               |
 | October 31-November 6  | Add small UI improvements, sounds, animations, and a simple mute option.                                                                                 |
 | November 7-13          | Ask 3 friends to try Benson and note what confuses them or does not work.                                                                                |
 | November 14-20         | Fix the biggest issues from testing and ask a few more people to try it if time allows.                                                                  |

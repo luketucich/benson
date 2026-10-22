@@ -2,7 +2,7 @@
 
 ## Goal
 
-- Finish the full MVP by **Friday, October 2, 2026**.
+- Finish the full MVP by **Friday, October 2, 2026**. The last piece, the recording shortcut, landed on October 7.
 - Make one complete flow work well before adding extra features.
 
 ## How It Works
@@ -16,7 +16,9 @@
 
 The review preview is working. I finished and tested it on October 1 while catching up. Benson saves the audio and transcript first and waits for Send before writing a note. Drafts are not saved when switching recordings, changing the prompt, or closing the app.
 
-The recording shortcut is done. Hold it from any app to record. Release to prepare a draft. More testing with my own voice is still planned.
+The recording shortcut is done. Hold it from any app to record. Release to prepare a draft.
+
+Every part of the MVP is built. Testing the whole flow with my own voice and writing up the MVP are still left, and both are planned for October 24-30.
 
 ## Basic App
 
