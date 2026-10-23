@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
-import type { ShortcutState } from '../../../shortcut'
+import { unsetShortcut, type ShortcutState } from '../../../shortcut'
 import { useEventCallback } from './useEventCallback'
-
-const unset: ShortcutState = { label: 'Not set', listening: false, saving: false, error: null }
 
 // Holds the recording shortcut's settings and reports when the key is held.
 export function useShortcut(onHold: (down: boolean) => void): {
@@ -11,7 +9,7 @@ export function useShortcut(onHold: (down: boolean) => void): {
   buttonText: string
   change: () => Promise<void>
 } {
-  const [state, setState] = useState<ShortcutState>(unset)
+  const [state, setState] = useState<ShortcutState>(unsetShortcut)
   const hold = useEventCallback(onHold)
 
   useEffect(() => {
@@ -43,9 +41,9 @@ export function useShortcut(onHold: (down: boolean) => void): {
     }
   }
 
-  let buttonText = state.label === 'Not set' ? 'Set shortcut' : 'Change shortcut'
+  let buttonText = state.label === unsetShortcut.label ? 'Set shortcut' : 'Change shortcut'
   if (state.listening) buttonText = 'Cancel'
-  if (state.saving) buttonText = 'Saving…'
+  if (state.saving) buttonText = 'Saving...'
 
   return { state, changing: state.listening || state.saving, buttonText, change }
 }

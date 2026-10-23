@@ -1,7 +1,7 @@
 import { readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Input } from 'electron'
-import type { RecordingShortcut, ShortcutState } from '../../shortcut'
+import { unsetShortcut, type RecordingShortcut, type ShortcutState } from '../../shortcut'
 import { labelFor, validateShortcut } from './keys'
 import { killHelper, startHelper, stopHelper } from './helper'
 
@@ -9,7 +9,7 @@ let shortcut: RecordingShortcut | null = null
 let settingsPath = ''
 let held = false
 let quitting = false
-let state: ShortcutState = { label: 'Not set', listening: false, saving: false, error: null }
+let state: ShortcutState = { ...unsetShortcut }
 let onChange: ((state: ShortcutState) => void) | null = null
 let onHold: ((down: boolean) => void) | null = null
 

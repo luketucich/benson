@@ -21,7 +21,7 @@ export function createTray(): void {
 // Shows what Benson is doing next to the menu bar icon.
 export function showActivity(activity: RecordingActivity): void {
   const title =
-    activity === 'recording' ? 'Recording…' : activity === 'processing' ? 'Working…' : ''
+    activity === 'recording' ? 'Recording...' : activity === 'processing' ? 'Working...' : ''
   if (process.platform === 'darwin') tray?.setTitle(title)
-  tray?.setToolTip(title ? `Benson — ${title}` : 'Benson')
+  tray?.setToolTip(title ? `Benson: ${title}` : 'Benson')
 }

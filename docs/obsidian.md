@@ -1,31 +1,35 @@
 # Obsidian
 
-Benson uses [MCPVault](https://github.com/bitbonsai/mcpvault) to search and read notes in `~/Documents/Benson Vault`. It starts with Benson and stops when the app quits. Obsidian does not need to be open, and no plugin is needed. To see the notes, choose **Open folder as vault** in Obsidian and select that folder.
+Benson uses [MCPVault](https://github.com/bitbonsai/mcpvault) to search and read notes in `~/Documents/Benson Vault`. It starts and stops with Benson. Obsidian does not need to be open. To see the notes, choose **Open folder as vault** in Obsidian and pick that folder.
 
 ## Review and send
 
-1. Stop recording. Benson saves the audio and transcript, then asks Qwen to prepare a note.
-2. Check the action, destination, and note text. Edit the destination or text if needed.
+1. Stop recording. Benson saves the audio and transcript, then asks Qwen for a draft.
+2. Check the action, destination, and text. Edit them if needed.
 3. Choose **Send** to save the note or **Cancel** to keep just the recording.
 
-There is no automatic Inbox send anymore. Select an unsent recording in History and choose **Prepare draft** to try again. If Qwen needs more detail, add it to your instructions and prepare another draft.
+If a draft fails or Qwen asks a question, select the recording in History, add detail to the instructions, and choose **Prepare draft** again.
 
-Creating a note fails if the filename is taken. Appending fails if the note is missing. Permission errors are shown separately. A small write function handles this because MCPVault's write tool can replace existing files. Hidden paths, symbolic links, and paths outside the vault are blocked.
+Drafts are not saved. Cancel, switching recordings, editing the instructions, or quitting clears the preview. The audio and transcript stay in History.
 
-History shows the sent time after a successful write. A recording marked as sent cannot be sent again. If the note is saved but its timestamp fails, a retry in the same app session only saves the timestamp. If the app crashes between those steps, check the vault before trying again.
+## How notes are written
 
-Drafts and edits are not saved. Cancel, switching recordings, changing the prompt, or quitting the app clears the preview. Closing the window hides it and keeps Benson running. The audio and transcript stay in History.
+MCPVault's write tool can replace whole files, so Benson writes approved drafts itself:
+
+- **Create** fails if the note already exists.
+- **Append** fails if the note is missing.
+- Hidden paths, symbolic links, and paths outside the vault are blocked.
+
+After a note is saved, History shows the sent time and that recording cannot be sent again. If the note saves but the timestamp does not, trying again only saves the timestamp.
 
 ## Qwen
 
-Run `ollama serve`, then `ollama pull qwen3.5:4b` in another terminal. Benson calls Ollama at `127.0.0.1:11434` using [structured outputs](https://docs.ollama.com/capabilities/structured-outputs). Empty or invalid replies cannot be sent.
+Benson calls Ollama at `127.0.0.1:11434` with [structured outputs](https://docs.ollama.com/capabilities/structured-outputs), and checks the reply before showing it. Qwen sees up to five matching notes, 3,000 characters each. `Benson Inbox.md` is skipped.
 
-Qwen gets up to five matching notes, with up to 3,000 characters from each. `Benson Inbox.md` is skipped because older recordings may already be there. Search can miss related wording or return unrelated notes. Qwen can also guess the wrong destination, add details that were not said, or describe a note as saved before it is. Always check the preview. Vague requests were inconsistent in testing.
+Qwen can still pick the wrong note, add things I did not say, or miss a related note. Always check the preview.
 
 ## What I tested
 
-I tested grocery, project, new-topic, and unclear requests on October 1. Searching and preparing drafts left the test vault unchanged. The full recording, transcription, preview, and Send flow worked with computer-generated speech and the local models.
+On October 1 I tested grocery, project, new-topic, and vague requests. The full flow worked using computer-generated speech. Vague requests were hit or miss.
 
-I also checked creating and appending, edits, Cancel, switching recordings, errors, retry, repeated clicks, and reopening the app. These checks used a separate database and vault. Some used fixed model replies or forced errors to check recovery. They do not prove Qwen's accuracy.
-
-Build, lint, and formatting checks passed. More testing with my own voice is still needed. See the [recording shortcut](../README.md#recording-shortcut).
+I also checked create, append, edits, Cancel, switching recordings, errors, retries, double clicks, and reopening the app, using a separate test vault. Testing with my own voice is still left.

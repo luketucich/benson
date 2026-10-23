@@ -23,7 +23,7 @@ export function HistoryList({
   return (
     <section aria-labelledby="history-heading">
       <h2 id="history-heading">History</h2>
-      {loading && <Status>Loading recordings…</Status>}
+      {loading && <Status>Loading recordings...</Status>}
       {error && (
         <div>
           <Alert>{error}</Alert>

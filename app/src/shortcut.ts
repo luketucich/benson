@@ -13,4 +13,13 @@ export interface ShortcutState {
   error: string | null
 }
 
-export type RecordingActivity = 'idle' | 'starting' | 'recording' | 'processing'
+// What both sides show before a shortcut is picked.
+export const unsetShortcut: ShortcutState = {
+  label: 'Not set',
+  listening: false,
+  saving: false,
+  error: null
+}
+
+export const recordingActivities = ['idle', 'starting', 'recording', 'processing'] as const
+export type RecordingActivity = (typeof recordingActivities)[number]

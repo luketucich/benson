@@ -1,12 +1,12 @@
 import { searchNotes, readNote } from './obsidian'
 import { askQwen } from './qwen'
-import { validateDraft, type NoteDraft } from '../noteDraft'
+import { noteActions, noteCategories, validateDraft, type NoteDraft } from '../noteDraft'
 
 const draftSchema = {
   type: 'object',
   properties: {
-    action: { type: 'string', enum: ['create', 'append', 'clarify'] },
-    category: { type: 'string', enum: ['Task', 'Idea', 'Reference', 'Journal', 'Unclear'] },
+    action: { type: 'string', enum: noteActions },
+    category: { type: 'string', enum: noteCategories },
     path: { type: 'string' },
     content: { type: 'string' },
     explanation: { type: 'string' }

@@ -1,10 +1,10 @@
 # Benson
 
-Benson is a desktop app for saving a quick thought without leaving what you are working on. Record a voice note, review what Benson understood, and send it to Obsidian. The full scope is in the [MVP plan](docs/mvp-plan.md).
+Benson is a Mac app for saving a quick thought without leaving what you are doing. Record a voice note, check what Benson made of it, and send it to Obsidian. The scope is in the [MVP plan](docs/mvp-plan.md).
 
 ## Run locally
 
-Use an Apple Silicon Mac, Node.js, and the [transcription setup](docs/transcription.md). Install [Ollama](https://ollama.com), start it with `ollama serve`, then run these commands from the Benson folder in another terminal:
+You need an Apple Silicon Mac, Node.js, [Ollama](https://ollama.com), and the [transcription setup](docs/transcription.md). Start Ollama with `ollama serve`, then run this from the Benson folder in another terminal:
 
 ```sh
 ollama pull qwen3.5:4b
@@ -13,17 +13,13 @@ npm install
 npm run dev
 ```
 
-Stop a recording to save the audio and transcript. Qwen then prepares a note for review. Check where it will go and what it will say, make any changes, then choose **Send** or **Cancel**. Nothing is added to Obsidian until Send. The recording stays in History if something fails.
-
-Drafts are not saved when you switch recordings or quit the app. Qwen can still get the note wrong. See [Obsidian](docs/obsidian.md) for what works and what still needs testing.
+Record a note and stop. Benson saves the audio, transcribes it, and Qwen drafts a note. Check the destination and text, edit if needed, then choose **Send** or **Cancel**. Nothing goes to Obsidian until you choose Send.
 
 ## Recording shortcut
 
-Click **Set shortcut** and press a combination such as **Control + Option + Space**. Benson remembers it. Use **Change shortcut** to replace it, or Escape to cancel.
+Click **Set shortcut** and press something like **Control + Option + Space**. Hold it from any app to record and release it to stop. The review window opens when the draft is ready.
 
-Hold it from any app to record. Release to prepare a draft. The menu bar shows **Recording…** or **Working…**, and the review window opens when it finishes. Nothing is sent until **Send**.
-
-Closing the window keeps Benson running. Click its menu bar icon to reopen it, or choose **Quit Benson** to stop it. The shortcut works on Mac only. Development builds need Apple's Command Line Tools.
+Closing the window keeps Benson running in the menu bar. Click the icon to reopen it, or choose **Quit Benson**. Building the shortcut needs Apple's Command Line Tools.
 
 ## Documents
 
@@ -34,26 +30,18 @@ Closing the window keeps Benson running. Click its menu bar icon to reopen it, o
 - [Weekly updates](https://github.com/luketucich/benson/wiki)
 - [Meeting notes](docs/meeting-notes/)
 
-## Code Layout
+## Code layout
 
-Each file does one job, so you can read just the part you need.
-
-- `app/src/main/`: The Electron side. `index.ts` starts and stops Benson, `ipc.ts` lists every request the screen can make, and `window.ts`, `tray.ts`, `recordingFiles.ts`, `database.ts`, `obsidian.ts`, `qwen.ts`, `noteSuggestion.ts` and `noteWriter.ts` each handle one piece.
-- `app/src/main/recordingShortcut/`: Watches for the shortcut. `keys.ts` turns a key into Mac numbers, `helper.ts` runs the small program in `app/native/`, and `index.ts` keeps the settings.
-- `app/src/preload/`: Functions the screen can call through `window.api`.
-- `app/src/renderer/src/`: The React screen. `hooks/` holds the recorder, history and shortcut, `components/` holds the pieces you see, and `App.tsx` puts them together.
-- `app/src/*.ts`: Types both sides share.
-- `scripts/transcribe.py`: The Python script that runs Parakeet.
+- `app/src/main/`: The Electron side. `index.ts` starts Benson, `ipc.ts` lists every request the screen can make, and each other file handles one piece.
+- `app/src/main/recordingShortcut/`: The global shortcut. `keys.ts` maps keys to Mac numbers, `helper.ts` runs the small program in `app/native/`, and `index.ts` saves the setting.
+- `app/src/preload/`: What the screen can call through `window.api`.
+- `app/src/renderer/src/`: The React screen. `hooks/` has the recorder, history, and shortcut, and `components/` has the pieces you see.
+- `app/src/*.ts`: Types and checks both sides share.
+- `scripts/transcribe.py`: Runs Parakeet.
 
 ## Timeline
 
-Weekly meetings with my professor happen on Wednesdays, and a weekly update goes out every Friday.
-
-### Where things stand
-
-The MVP is built. Recording, transcription, the Qwen draft, the review step, Obsidian, and the recording shortcut all work. The goal was **Friday, October 2, 2026**. The shortcut landed on October 6 and 7, a few days late.
-
-Two things are still open: testing the whole flow with my own voice, and writing up the MVP. Both are planned for October 24-30.
+I meet with my professor on Thursdays and send a weekly update every Friday.
 
 | Week                   | Main goal                                                                                                                                                |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |

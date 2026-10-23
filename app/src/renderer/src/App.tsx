@@ -169,8 +169,8 @@ function App(): React.JSX.Element {
       >
         {recorder.recording ? 'Stop recording' : 'Record'}
       </button>
-      {recorder.recording && <Status>Recording…</Status>}
-      {busy && <Status>Working…</Status>}
+      {recorder.recording && <Status>Recording...</Status>}
+      {busy && <Status>Working...</Status>}
       {error && <Alert>{error}</Alert>}
 
       <ShortcutSettings

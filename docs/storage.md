@@ -1,13 +1,9 @@
 # Local Storage
 
-Benson uses SQLite to keep each new recording's date, file path, and transcript after the app closes. The audio stays in a separate file.
+Benson keeps each recording's date, audio path, transcript, and sent time in SQLite. The audio is saved as its own file.
 
-Benson saves the recording first, then adds the transcript when Parakeet finishes. If transcription fails, the recording is still saved.
+The recording is saved before transcription, so it stays in History even if Parakeet fails.
 
-The database is `benson.sqlite` in `~/Library/Application Support/benson/`. SQLite is included with Electron, so there is nothing extra to install.
+Everything lives in `~/Library/Application Support/benson/`. The database is `benson.sqlite` and the audio is in `recordings/`. SQLite comes with Electron, so there is nothing extra to install.
 
-History shows saved recordings, newest first. Select one to play the audio and read its transcript. Older audio files have not been added to the database yet.
-
-After a successful send to Obsidian, Benson saves the time and shows it in History. A recording marked as sent cannot be sent again. Older sends made before this feature were not tracked.
-
-Drafts and edits are not saved. Cancel, switching recordings, changing the prompt, or quitting the app clears the draft. Closing the window hides it and keeps Benson running. The saved audio and transcript stay in History.
+History lists recordings newest first. Select one to play it and read its transcript. Audio recorded before the database was added does not show up.

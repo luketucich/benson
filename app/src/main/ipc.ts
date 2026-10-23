@@ -6,9 +6,7 @@ import { readAudio, saveAudio, transcribeAudio } from './recordingFiles'
 import { beginShortcutCapture, cancelShortcutCapture, getShortcutState } from './recordingShortcut'
 import { showActivity } from './tray'
 import { showWindow } from './window'
-import type { RecordingActivity } from '../shortcut'
-
-const activities: RecordingActivity[] = ['idle', 'starting', 'recording', 'processing']
+import { recordingActivities, type RecordingActivity } from '../shortcut'
 
 // What the screen is doing right now, so the shortcut cannot change mid-recording.
 let activity: RecordingActivity = 'idle'
@@ -43,7 +41,7 @@ export function registerHandlers(): void {
   ipcMain.handle('cancel-shortcut-capture', cancelShortcutCapture)
 
   ipcMain.on('recording-activity', (_, next: RecordingActivity) => {
-    if (!activities.includes(next)) return
+    if (!recordingActivities.includes(next)) return
     activity = next
     showActivity(next)
   })

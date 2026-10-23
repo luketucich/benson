@@ -2,31 +2,23 @@
 
 ## Goal
 
-- Finish the full MVP by **Friday, October 2, 2026**. The last piece, the recording shortcut, landed on October 7.
-- Make one complete flow work well before adding extra features.
+Get one complete flow working well before adding anything else. The target was **Friday, October 2, 2026**.
 
-## How It Works
+## How it works
 
 1. Record and save a short audio clip.
-2. Use Parakeet to turn the audio into a transcript.
-3. Use Qwen to choose an Obsidian note and prepare the content.
-4. Show the action, destination, and note text in a preview so the user can make changes.
-5. Send only after approval, or cancel and keep the saved recording.
-6. Keep the recording path, transcript, and successful sent time in SQLite. Store the audio separately.
+2. Parakeet turns the audio into a transcript.
+3. Qwen picks an Obsidian note and drafts the text.
+4. A preview shows the action, destination, and text so I can edit them.
+5. **Send** writes the note. **Cancel** keeps just the recording.
+6. SQLite keeps the recording path, transcript, and sent time. The audio is a separate file.
 
-The review preview is working. I finished and tested it on October 1 while catching up. Benson saves the audio and transcript first and waits for Send before writing a note. Drafts are not saved when switching recordings, changing the prompt, or closing the app.
+## What the MVP has
 
-The recording shortcut is done. Hold it from any app to record. Release to prepare a draft.
-
-Every part of the MVP is built. Testing the whole flow with my own voice and writing up the MVP are still left, and both are planned for October 24-30.
-
-## Basic App
-
-- A small menu bar app for Mac
-- A **Record** button
-- A hotkey to start and stop recording
-- A saved transcript and editable note destination and text
-- **Send** and **Cancel** in the review preview
+- A small Mac menu bar app
+- A **Record** button and a hold-to-record shortcut
+- An editable destination and note text
+- **Send** and **Cancel** in the preview
 - A simple history list
 - One Obsidian vault
 - The default microphone
@@ -34,41 +26,28 @@ Every part of the MVP is built. Testing the whole flow with my own voice and wri
 ## Tools
 
 - **Desktop app:** Electron, React, and TypeScript
-- **Speech-to-text:** NVIDIA Parakeet TDT 0.6B v2
-- **Speech runtime on Mac:** parakeet-mlx
-- **Local model:** Qwen3.5 4B
-- **Local storage:** SQLite
-- **Destination:** Obsidian
-- **Connector:** [MCPVault](https://github.com/bitbonsai/mcpvault)
+- **Speech-to-text:** NVIDIA Parakeet TDT 0.6B v2 through [parakeet-mlx](https://github.com/senstella/parakeet-mlx)
+- **Local model:** Qwen3.5 4B through [Ollama](https://ollama.com/library/qwen3.5:4b)
+- **Storage:** SQLite
+- **Obsidian connector:** [MCPVault](https://github.com/bitbonsai/mcpvault)
 
-## Local Qwen and Obsidian
+Qwen only drafts text. It cannot run tools or write notes. See [Obsidian](obsidian.md) for how drafts are checked and saved.
 
-Benson currently uses Ollama with `qwen3.5:4b`. Run `ollama serve`, then `ollama pull qwen3.5:4b` in another terminal. Qwen returns the action, path, text, and a short explanation, or asks for clarification. Benson checks the reply before showing it. Qwen cannot run tools or write notes.
-
-MCPVault searches and reads notes. A small write function saves approved drafts because MCPVault's write tool can replace existing files. Creating a note fails if the name is taken. Appending requires an existing note. See [Obsidian](obsidian.md) for the details.
-
-## Not Included in the MVP
+## Not in the MVP
 
 - Continuous listening or meeting recording
 - Deleting, renaming, or moving notes
 - Calendar, task, email, or other connectors
 - Windows support
 
-These would add setup, security, and edge-case work without making the first demo stronger.
+These add setup and edge cases without making the first demo better.
 
-## Later Ideas
+## Later ideas
 
 - Google Calendar events
-- A better-looking application window
-- A small floating window for the review
+- A nicer main window
+- A small floating review window
 - Sounds and small animations
 - More settings
 - Windows support
 - More connectors
-
-## Sources
-
-- [Ollama API](https://docs.ollama.com/api/introduction)
-- [Ollama structured outputs](https://docs.ollama.com/capabilities/structured-outputs)
-- [Qwen3.5 4B in Ollama](https://ollama.com/library/qwen3.5:4b)
-- [llama.cpp](https://github.com/ggml-org/llama.cpp)

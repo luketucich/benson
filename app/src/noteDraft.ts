@@ -1,6 +1,10 @@
+// Kept in one place so the Qwen schema and the checks below always match.
+export const noteActions = ['create', 'append', 'clarify'] as const
+export const noteCategories = ['Task', 'Idea', 'Reference', 'Journal', 'Unclear'] as const
+
 export interface NoteDraft {
-  action: 'create' | 'append' | 'clarify'
-  category: 'Task' | 'Idea' | 'Reference' | 'Journal' | 'Unclear'
+  action: (typeof noteActions)[number]
+  category: (typeof noteCategories)[number]
   path: string
   content: string
   explanation: string
@@ -25,10 +29,8 @@ export function validateDraft(value: unknown): NoteDraft {
   if (!value || typeof value !== 'object') throw new Error('Qwen did not return a note draft.')
   const draft = value as Record<string, unknown>
   if (
-    typeof draft.action !== 'string' ||
-    !['create', 'append', 'clarify'].includes(draft.action) ||
-    typeof draft.category !== 'string' ||
-    !['Task', 'Idea', 'Reference', 'Journal', 'Unclear'].includes(draft.category) ||
+    !noteActions.includes(draft.action as NoteDraft['action']) ||
+    !noteCategories.includes(draft.category as NoteDraft['category']) ||
     typeof draft.path !== 'string' ||
     typeof draft.content !== 'string' ||
     typeof draft.explanation !== 'string' ||

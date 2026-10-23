@@ -18,7 +18,7 @@ export function ShortcutSettings({
     <section aria-label="Recording shortcut" className="shortcut-settings">
       <div className="shortcut-controls">
         <strong>Shortcut</strong>
-        <Status>{state.listening ? 'Press keys…' : state.label}</Status>
+        <Status>{state.listening ? 'Press keys...' : state.label}</Status>
         <button disabled={disabled} onClick={onChange}>
           {buttonText}
         </button>
