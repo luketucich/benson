@@ -24,7 +24,7 @@ After a note is saved, History shows the sent time and that recording cannot be 
 
 ## Qwen
 
-Benson calls Ollama at `127.0.0.1:11434` with [structured outputs](https://docs.ollama.com/capabilities/structured-outputs), and checks the reply before showing it. Qwen sees up to five matching notes, 3,000 characters each. `Benson Inbox.md` is skipped.
+Benson calls Ollama at `127.0.0.1:11434` with [structured outputs](https://docs.ollama.com/capabilities/structured-outputs), and checks the reply before showing it. Search leaves out filler words like "to" and "my". Qwen sees up to five matching notes, 3,000 characters each, plus today's date and the vault's top-level folders. `Benson Inbox.md` is skipped.
 
 Qwen can still pick the wrong note, add things I did not say, or miss a related note. Always check the preview.
 
@@ -32,4 +32,4 @@ Qwen can still pick the wrong note, add things I did not say, or miss a related 
 
 On October 1 I tested grocery, project, new-topic, and vague requests. The full flow worked using computer-generated speech. Vague requests were hit or miss.
 
-I also checked create, append, edits, Cancel, switching recordings, errors, retries, double clicks, and reopening the app, using a separate test vault. Testing with my own voice is still left.
+I also checked create, append, edits, Cancel, switching recordings, errors, retries, double clicks, and reopening the app, using a separate test vault. Testing with my own voice is still left. See [edge case testing](testing/edge-cases.md) for what happens with messier vaults.

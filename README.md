@@ -27,6 +27,7 @@ Closing the window keeps Benson running in the menu bar. Click the icon to reope
 - [Local transcription](docs/transcription.md)
 - [Local storage](docs/storage.md)
 - [Obsidian](docs/obsidian.md)
+- [Edge case testing](docs/testing/edge-cases.md)
 - [Weekly updates](https://github.com/luketucich/benson/wiki)
 - [Meeting notes](docs/meeting-notes/)
 

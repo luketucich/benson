@@ -22,7 +22,7 @@ export async function closeVault(): Promise<void> {
 }
 
 // Suggestions only need read access. Approved writes are handled in noteWriter.ts.
-const allowedTools = ['search_notes', 'read_note']
+const allowedTools = ['list_directory', 'search_notes', 'read_note']
 
 async function callTool(name: string, args: Record<string, unknown>): Promise<string> {
   if (!client) throw new Error('Benson is not connected to the Obsidian vault.')
@@ -33,6 +33,12 @@ async function callTool(name: string, args: Record<string, unknown>): Promise<st
   const text = result.content.map((part) => (part.type === 'text' ? part.text : '')).join('')
   if (result.isError) throw new Error(text)
   return text
+}
+
+// List the folders at the top of the vault, skipping hidden ones like .obsidian.
+export async function listFolders(): Promise<string[]> {
+  const { dirs }: { dirs: string[] } = JSON.parse(await callTool('list_directory', { path: '' }))
+  return dirs.filter((dir) => !dir.startsWith('.'))
 }
 
 // Find up to five notes containing the search text.
