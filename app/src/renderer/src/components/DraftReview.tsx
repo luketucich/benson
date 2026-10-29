@@ -49,7 +49,7 @@ export function DraftReview({ draft, onCancel, ...fields }: Props): React.JSX.El
       <p>Category: {draft.category}</p>
       <p>{draft.explanation}</p>
       {draft.action === 'clarify' ? (
-        <p>Add more detail to your instructions, then prepare another draft.</p>
+        <p>Record again with more detail.</p>
       ) : (
         <DraftFields draft={draft} {...fields} />
       )}

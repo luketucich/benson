@@ -57,3 +57,14 @@ export function validateDraft(value: unknown): NoteDraft {
     explanation: draft.explanation.trim()
   }
 }
+
+const listItem = /^\s*(?:[-*+]|\d+\.)\s/
+
+// What goes between a note and new text, so a new list item stays part of the list above it.
+export function appendSeparator(note: string, content: string): string {
+  if (!note) return ''
+  const lastLine = note.trimEnd().split('\n').pop() ?? ''
+  const blankLine = listItem.test(lastLine) && listItem.test(content) ? '\n' : '\n\n'
+  const trailing = note.length - note.trimEnd().length
+  return blankLine.slice(Math.min(trailing, blankLine.length))
+}

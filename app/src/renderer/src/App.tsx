@@ -10,11 +10,7 @@ import { HistoryList } from './components/HistoryList'
 import { SelectedRecording } from './components/SelectedRecording'
 import { ShortcutSettings } from './components/ShortcutSettings'
 
-const defaultPrompt =
-  'Classify this transcript as Task, Idea, Reference, Journal, or Unclear. Suggest an existing note to add it to, or a new note if none fits. Prepare the note text and give one short reason. Ask a question if the request is unclear.'
-
 function App(): React.JSX.Element {
-  const [prompt, setPrompt] = useState(defaultPrompt)
   const [draft, setDraft] = useState<NoteDraft | null>(null)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [savedPath, setSavedPath] = useState<string | null>(null)
@@ -53,11 +49,6 @@ function App(): React.JSX.Element {
       return
     }
     if (busy || recorder.recording || shortcut.changing) return
-    if (!prompt.trim()) {
-      setError('Add instructions before recording.')
-      window.api.showReview()
-      return
-    }
     clearMessages()
     void recorder.start(true)
   }
@@ -102,7 +93,7 @@ function App(): React.JSX.Element {
     setDraft(null)
     setQwenError('')
     try {
-      setDraft(await window.api.askQwen(prompt, text))
+      setDraft(await window.api.askQwen(text))
     } catch {
       setQwenError(
         'Could not prepare a draft. Check that Ollama is running and the vault is available, then try again.'
@@ -151,22 +142,7 @@ function App(): React.JSX.Element {
     <main>
       <h1>Benson</h1>
 
-      <label htmlFor="instructions">Instructions</label>
-      <textarea
-        id="instructions"
-        rows={4}
-        value={prompt}
-        disabled={busy || recorder.recording || shortcut.changing}
-        onChange={(event) => {
-          setPrompt(event.target.value)
-          setDraft(null)
-        }}
-      />
-
-      <button
-        disabled={busy || shortcut.changing || (!recorder.recording && !prompt.trim())}
-        onClick={toggleRecording}
-      >
+      <button disabled={busy || shortcut.changing} onClick={toggleRecording}>
         {recorder.recording ? 'Stop recording' : 'Record'}
       </button>
       {recorder.recording && <Status>Recording...</Status>}
@@ -187,7 +163,7 @@ function App(): React.JSX.Element {
           busy={busy}
           showPrepare={Boolean(selected?.transcript && !selected.sent_at && !draft)}
           prepareLabel={qwenError ? 'Retry draft' : 'Prepare draft'}
-          prepareDisabled={busy || recorder.recording || !prompt.trim()}
+          prepareDisabled={busy || recorder.recording}
           onPrepare={async () => {
             setWorking(true)
             setError(null)

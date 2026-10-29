@@ -14,8 +14,7 @@ contextBridge.exposeInMainWorld('api', {
   transcribeRecording: (filePath: string) => ipcRenderer.invoke('transcribe-recording', filePath),
   getRecordings: () => ipcRenderer.invoke('get-recordings'),
   readRecording: (id: number) => ipcRenderer.invoke('read-recording', id),
-  askQwen: (prompt: string, transcript: string) =>
-    ipcRenderer.invoke('ask-qwen', prompt, transcript),
+  askQwen: (transcript: string) => ipcRenderer.invoke('ask-qwen', transcript),
   saveApprovedDraft: (id: number, draft: unknown) =>
     ipcRenderer.invoke('save-approved-draft', id, draft),
   getRecordingShortcut: () => ipcRenderer.invoke('get-recording-shortcut'),

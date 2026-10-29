@@ -8,9 +8,9 @@ Benson uses [MCPVault](https://github.com/bitbonsai/mcpvault) to search and read
 2. Check the action, destination, and text. Edit them if needed.
 3. Choose **Send** to save the note or **Cancel** to keep just the recording.
 
-If a draft fails or Qwen asks a question, select the recording in History, add detail to the instructions, and choose **Prepare draft** again.
+If a draft fails, select the recording in History and choose **Prepare draft** again. If Qwen asks a question, record again with more detail.
 
-Drafts are not saved. Cancel, switching recordings, editing the instructions, or quitting clears the preview. The audio and transcript stay in History.
+Drafts are not saved. Cancel, switching recordings, or quitting clears the preview. The audio and transcript stay in History.
 
 ## How notes are written
 
@@ -24,7 +24,7 @@ After a note is saved, History shows the sent time and that recording cannot be 
 
 ## Qwen
 
-Benson calls Ollama at `127.0.0.1:11434` with [structured outputs](https://docs.ollama.com/capabilities/structured-outputs), and checks the reply before showing it. Search leaves out filler words like "to" and "my". Qwen sees up to five matching notes, 3,000 characters each, plus today's date and the vault's top-level folders. `Benson Inbox.md` is skipped.
+Benson calls Ollama at `127.0.0.1:11434` with [structured outputs](https://docs.ollama.com/capabilities/structured-outputs), and checks the reply before showing it. Search leaves out filler words like "to" and "my", and Benson also checks note names and dates. Qwen sees up to five matching notes, about 3,000 characters each with long ones cut in the middle, plus the date, the week number, and the vault's folders. `Benson Inbox.md` is skipped.
 
 Qwen can still pick the wrong note, add things I did not say, or miss a related note. Always check the preview.
 

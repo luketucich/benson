@@ -1,7 +1,7 @@
 import { constants } from 'node:fs'
-import { lstat, mkdir, open, realpath } from 'node:fs/promises'
+import { lstat, mkdir, open, readFile, realpath } from 'node:fs/promises'
 import { join } from 'node:path'
-import { validateDraft, type NoteDraft } from '../noteDraft'
+import { appendSeparator, validateDraft, type NoteDraft } from '../noteDraft'
 import { getRecording, markRecordingSent } from './database'
 
 let vaultFolder: string | null = null
@@ -44,7 +44,10 @@ async function writeDraft(draft: NoteDraft): Promise<void> {
     try {
       const info = await file.stat()
       if (!info.isFile()) throw new Error('The destination must be a Markdown file.')
-      const separator = draft.action === 'append' && info.size > 0 ? '\n\n' : ''
+      const separator =
+        draft.action === 'append'
+          ? appendSeparator(await readFile(path, 'utf8'), draft.content)
+          : ''
       await file.writeFile(separator + draft.content, 'utf8')
       await file.sync()
     } finally {

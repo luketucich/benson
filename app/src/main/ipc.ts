@@ -23,10 +23,9 @@ export function registerHandlers(): void {
     return readAudio(recording.audio_path)
   })
 
-  ipcMain.handle('ask-qwen', (_, prompt: string, transcript: string) => {
-    if (!prompt.trim() || !transcript.trim())
-      throw new Error('A prompt and transcript are required.')
-    return suggestNote(prompt, transcript)
+  ipcMain.handle('ask-qwen', (_, transcript: string) => {
+    if (!transcript.trim()) throw new Error('A transcript is required.')
+    return suggestNote(transcript)
   })
 
   ipcMain.handle('save-approved-draft', (_, id: number, draft: unknown) =>

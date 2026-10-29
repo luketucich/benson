@@ -35,10 +35,26 @@ async function callTool(name: string, args: Record<string, unknown>): Promise<st
   return text
 }
 
-// List the folders at the top of the vault, skipping hidden ones like .obsidian.
-export async function listFolders(): Promise<string[]> {
-  const { dirs }: { dirs: string[] } = JSON.parse(await callTool('list_directory', { path: '' }))
-  return dirs.filter((dir) => !dir.startsWith('.'))
+// List every folder and note in the vault, skipping hidden ones like .obsidian.
+export async function listVault(): Promise<{ folders: string[]; notes: string[] }> {
+  const folders: string[] = []
+  const notes: string[] = []
+  const queue = ['']
+
+  // The cap keeps a huge vault from slowing down every draft.
+  while (queue.length && folders.length < 200) {
+    const path = queue.shift() as string
+    const { dirs, files }: { dirs: string[]; files: string[] } = JSON.parse(
+      await callTool('list_directory', { path })
+    )
+    const inside = (name: string): string => (path ? `${path}/${name}` : name)
+    for (const dir of dirs.filter((name) => !name.startsWith('.'))) {
+      folders.push(inside(dir))
+      queue.push(inside(dir))
+    }
+    notes.push(...files.filter((name) => name.endsWith('.md')).map(inside))
+  }
+  return { folders, notes }
 }
 
 // Find up to five notes containing the search text.

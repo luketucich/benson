@@ -12,7 +12,7 @@ declare global {
       getRecordings(): Promise<SavedRecording[]>
       readRecording(id: number): Promise<ArrayBuffer>
       saveApprovedDraft(id: number, draft: NoteDraft): Promise<void>
-      askQwen(prompt: string, transcript: string): Promise<NoteDraft>
+      askQwen(transcript: string): Promise<NoteDraft>
       getRecordingShortcut(): Promise<ShortcutState>
       beginShortcutCapture(): Promise<void>
       cancelShortcutCapture(): Promise<void>

@@ -111,3 +111,44 @@ Not in anything I tried. Every time I hit Send, only the one note shown in the p
 - **Extra blank line:** adding to a checklist leaves a blank line, which splits it into two lists in Obsidian.
 
 For the demo, I'll use clear requests and always show the preview.
+
+## Second round
+
+October 29, 2026
+
+I had Claude run a new round with four new fake vaults, 181 notes in total: one with no folders, one with dates written differently, one with deep folders and notes that share a name, and one with long notes and hidden instructions. All 20 requests were typed, using the real Qwen and MCPVault, outside the Benson window. Nothing was spoken, and my real vault wasn't touched.
+
+### What went wrong at first
+
+Only 6 of the 20 were right.
+
+- **Today's note wasn't found.** `Daily/10-29-2026.md` existed, but search only reads the text inside notes, so Qwen never saw it and made `Daily/2026-10-29.md`.
+- **Deep folders were invisible.** Qwen only knew the top-level folders, so a banana bread recipe went in `Café Ideas/` instead of `Home/Recipes/`.
+- **Vague requests showed an error.** "Um okay never mind" came back as a draft with no path, and Benson showed an error instead of asking me.
+- **Long notes were cut off at the wrong end.** Qwen only saw the top of a long bug log, so it numbered a new bug 51 when the log already had 90.
+- **Questions became notes.** "What's on my packing list?" could make a new packing list.
+
+### What I changed
+
+- **Finding notes:** Benson now also checks note names, ignoring capitals and accents, so "cafe" finds `Café Ideas/`. Notes named with today's date are always included, or yesterday's if I say "yesterday".
+- **Context for Qwen:** It now gets every folder, the week number, and yesterday's date. Long notes show the start and the end.
+- **Code checks instead of rules:** Half-finished drafts and bad paths turn into a question. Questions get a reply without asking Qwen. If the vault has no folders, a new note stays at the top level. If Qwen mixes up create and append, Benson switches to the right one, which can't overwrite anything. If everything being added is already in the note, Benson asks first.
+- **Blank line bug:** Adding to a list no longer leaves a blank line, so the list stays in one piece in Obsidian. This was on the list from the first round.
+
+I also tried one bad fix. My first week number calculation was off by one, so Qwen picked last week's plan. The test caught it.
+
+### Result
+
+16 of 20 passed the automated checks, and two full runs gave the same answers. Reading the answers myself, 3 of those 16 still added things I didn't say, so **13 of 20 were fully right**.
+
+Saving was tested on a copy of a test vault. Adding, creating, refusing an existing note, refusing a missing note, and blocking paths outside the vault and symbolic links all worked. Asking Qwen for a draft never changed a file.
+
+### Still not great
+
+- **"Yesterday":** "Yesterday I finished the lab report" matched the lab report on the weekly plan, so Benson asked whether to add it again instead of adding it to yesterday's note.
+- **Old lists with other date styles:** Beans still got added to `Shopping/Oct 12 2026 Shopping.md`. The rule works for dates like `2026-09-14`, but not for this one.
+- **Two notes with the same name:** "Add to my meeting notes" made a new note in `Misc/` instead of asking which class. Saying the class name works.
+- **Item already on the list:** Qwen wrote "- [ ] socks (added)", which got past the duplicate check.
+- **Things I didn't say:** A workout log entry also got a made-up line for the day before, a dentist note had the wrong date for next Tuesday in its name, and a banana bread note got made-up ingredients.
+
+The preview shows all of these before anything is saved.
