@@ -41,7 +41,7 @@ export function useShortcut(onHold: (down: boolean) => void): {
     }
   }
 
-  let buttonText = state.label === unsetShortcut.label ? 'Set shortcut' : 'Change shortcut'
+  let buttonText = state.label === unsetShortcut.label ? 'Set shortcut' : 'Change'
   if (state.listening) buttonText = 'Cancel'
   if (state.saving) buttonText = 'Saving...'
 

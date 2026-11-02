@@ -24,7 +24,7 @@ After a note is saved, History shows the sent time and that recording cannot be 
 
 ## Qwen
 
-Benson calls Ollama at `127.0.0.1:11434` with [structured outputs](https://docs.ollama.com/capabilities/structured-outputs), and checks the reply before showing it. Search leaves out filler words like "to" and "my", and Benson also checks note names and dates. Qwen sees up to five matching notes, about 3,000 characters each with long ones cut in the middle, plus the date, the week number, and the vault's folders. `Benson Inbox.md` is skipped.
+Benson starts Ollama when it opens if it isn't already running, then calls it at `127.0.0.1:11434` with [structured outputs](https://docs.ollama.com/capabilities/structured-outputs), and checks the reply before showing it. Search leaves out filler words like "to" and "my", and Benson also checks note names and dates. Qwen sees up to five matching notes, about 3,000 characters each with long ones cut in the middle, plus the date, the week number, and the vault's folders. `Benson Inbox.md` is skipped.
 
 Qwen can still pick the wrong note, add things I did not say, or miss a related note. Always check the preview.
 

@@ -9,53 +9,57 @@ interface Props {
   onCancel: () => void
 }
 
-// The editable half of a draft. Shown only when Qwen picked a note to write to.
-function DraftFields({
+export function DraftReview({
   draft,
   disabled,
   canSend,
   onChange,
-  onSend
-}: Omit<Props, 'onCancel'>): React.JSX.Element {
-  return (
-    <>
-      <p>Action: {draft.action === 'create' ? 'Create a new note' : 'Append to a note'}</p>
-      <label htmlFor="note-path">Destination</label>
-      <input
-        id="note-path"
-        value={draft.path}
-        disabled={disabled}
-        onChange={(event) => onChange({ ...draft, path: event.target.value })}
-      />
-      <label htmlFor="note-content">Note text</label>
-      <textarea
-        id="note-content"
-        rows={6}
-        value={draft.content}
-        disabled={disabled}
-        onChange={(event) => onChange({ ...draft, content: event.target.value })}
-      />
-      <button disabled={!canSend} onClick={onSend}>
-        Send
-      </button>{' '}
-    </>
-  )
-}
+  onSend,
+  onCancel
+}: Props): React.JSX.Element {
+  const clarify = draft.action === 'clarify'
+  const action = draft.action === 'create' ? 'New note' : 'Add to note'
 
-export function DraftReview({ draft, onCancel, ...fields }: Props): React.JSX.Element {
   return (
-    <section aria-labelledby="draft-heading">
-      <h2 id="draft-heading">Review note</h2>
-      <p>Category: {draft.category}</p>
-      <p>{draft.explanation}</p>
-      {draft.action === 'clarify' ? (
-        <p>Record again with more detail.</p>
+    <section className="draft" aria-labelledby="draft-heading">
+      <h2 id="draft-heading" className="meta">
+        {clarify ? draft.category : `${action} · ${draft.category}`}
+      </h2>
+      <p className="draft-explanation">{draft.explanation}</p>
+
+      {/* The editable fields appear only when Qwen picked a note to write to. */}
+      {clarify ? (
+        <p className="draft-explanation">Record again with more detail.</p>
       ) : (
-        <DraftFields draft={draft} {...fields} />
+        <>
+          <label htmlFor="note-path">Destination</label>
+          <input
+            id="note-path"
+            value={draft.path}
+            disabled={disabled}
+            onChange={(event) => onChange({ ...draft, path: event.target.value })}
+          />
+          <label htmlFor="note-content">Note text</label>
+          <textarea
+            id="note-content"
+            rows={6}
+            value={draft.content}
+            disabled={disabled}
+            onChange={(event) => onChange({ ...draft, content: event.target.value })}
+          />
+        </>
       )}
-      <button disabled={fields.disabled} onClick={onCancel}>
-        Cancel
-      </button>
+
+      <div className="draft-actions">
+        <button className="button-ghost" disabled={disabled} onClick={onCancel}>
+          Cancel
+        </button>
+        {!clarify && (
+          <button className="button-primary" disabled={!canSend} onClick={onSend}>
+            Send
+          </button>
+        )}
+      </div>
     </section>
   )
 }

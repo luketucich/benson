@@ -5,6 +5,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { closeDatabase, openDatabase } from './database'
 import { closeVault, connectToVault } from './obsidian'
 import { setDraftVault } from './noteWriter'
+import { startOllama, stopOllama } from './ollama'
 import {
   closeRecordingShortcut,
   releaseRecordingShortcut,
@@ -34,6 +35,7 @@ app.whenReady().then(() => {
   mkdirSync(dataFolder, { recursive: true })
   openDatabase(join(dataFolder, 'benson.sqlite'))
   connectVault()
+  void startOllama()
 
   electronApp.setAppUserModelId('com.luketucich.benson')
 
@@ -64,6 +66,7 @@ app.on('will-quit', () => {
   closeRecordingShortcut()
   closeDatabase()
   closeVault()
+  stopOllama()
 })
 
 // On Mac, keep the menu bar app running after the window closes.

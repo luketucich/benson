@@ -1,3 +1,4 @@
+import '@fontsource-variable/bricolage-grotesque'
 import './styles.css'
 
 import { StrictMode } from 'react'

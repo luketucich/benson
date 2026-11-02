@@ -31,7 +31,12 @@ export function createWindow(): void {
     width: 900,
     height: 670,
     show: false,
+    minWidth: 640,
+    minHeight: 480,
     autoHideMenuBar: true,
+    // Let the sidebar run under the window buttons, like other Mac apps.
+    titleBarStyle: 'hiddenInset',
+    backgroundColor: '#17161a',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       backgroundThrottling: false,

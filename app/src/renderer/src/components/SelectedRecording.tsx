@@ -1,4 +1,5 @@
 interface Props {
+  createdAt: string | null
   audioUrl: string | null
   transcript: string | null
   busy: boolean
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function SelectedRecording({
+  createdAt,
   audioUrl,
   transcript,
   busy,
@@ -19,15 +21,24 @@ export function SelectedRecording({
   onPrepare,
   children
 }: Props): React.JSX.Element {
+  const when = createdAt ? new Date(createdAt) : new Date()
   return (
-    <section aria-label="Selected recording">
+    <section className="selected" aria-labelledby="recording-title">
+      <h1 id="recording-title" className="recording-title">
+        {when.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+      </h1>
       {audioUrl && <audio controls src={audioUrl} aria-label="Recording playback" />}
-      <h2>Transcript</h2>
-      {transcript ? <p className="transcript">{transcript}</p> : !busy && <p>No transcript yet.</p>}
+      {transcript ? (
+        <p className="transcript">{transcript}</p>
+      ) : (
+        !busy && <p className="transcript">No transcript yet.</p>
+      )}
       {showPrepare && (
-        <button disabled={prepareDisabled} onClick={onPrepare}>
-          {prepareLabel}
-        </button>
+        <p>
+          <button className="button-primary" disabled={prepareDisabled} onClick={onPrepare}>
+            {prepareLabel}
+          </button>
+        </p>
       )}
       {children}
     </section>

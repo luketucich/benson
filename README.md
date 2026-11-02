@@ -4,7 +4,7 @@ Benson is a Mac app for saving a quick thought without leaving what you are doin
 
 ## Run locally
 
-You need an Apple Silicon Mac, Node.js, [Ollama](https://ollama.com), and the [transcription setup](docs/transcription.md). Start Ollama with `ollama serve`, then run this from the Benson folder in another terminal:
+You need an Apple Silicon Mac, Node.js, [Ollama](https://ollama.com), and the [transcription setup](docs/transcription.md). The first time, start Ollama with `ollama serve` so you can download Qwen, then run this from the Benson folder in another terminal. After that, Benson starts Ollama itself when it opens, and stops it on quit unless Ollama was already running.
 
 ```sh
 ollama pull qwen3.5:4b

@@ -139,73 +139,100 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <main>
-      <h1>Benson</h1>
-
-      <button disabled={busy || shortcut.changing} onClick={toggleRecording}>
-        {recorder.recording ? 'Stop recording' : 'Record'}
-      </button>
-      {recorder.recording && <Status>Recording...</Status>}
-      {busy && <Status>Working...</Status>}
-      {error && <Alert>{error}</Alert>}
-
-      <ShortcutSettings
-        state={shortcut.state}
-        buttonText={shortcut.buttonText}
-        disabled={busy || recorder.recording || shortcut.state.saving}
-        onChange={shortcut.change}
-      />
-
-      {(audioUrl || savedPath) && (
-        <SelectedRecording
-          audioUrl={audioUrl}
-          transcript={transcript}
-          busy={busy}
-          showPrepare={Boolean(selected?.transcript && !selected.sent_at && !draft)}
-          prepareLabel={qwenError ? 'Retry draft' : 'Prepare draft'}
-          prepareDisabled={busy || recorder.recording}
-          onPrepare={async () => {
-            setWorking(true)
-            setError(null)
-            setSentMessage('')
-            await prepareDraft(selected?.transcript ?? '')
-            setWorking(false)
-          }}
-        >
-          {sentMessage && <Status>{sentMessage}</Status>}
-          {selected?.sent_at && <p>This recording has been sent to Obsidian.</p>}
-          {qwenError && <Alert>{qwenError}</Alert>}
-          {draft && (
-            <DraftReview
-              draft={draft}
-              disabled={busy}
-              canSend={
-                !busy &&
-                Boolean(selected && !selected.sent_at) &&
-                Boolean(draft.path.trim() && draft.content.trim())
-              }
-              onChange={setDraft}
-              onSend={sendDraft}
-              onCancel={() => {
-                setDraft(null)
-                setError(null)
-                setSentMessage('Draft cancelled. Your recording is still saved.')
-              }}
-            />
+    <div className="app">
+      <aside className="sidebar">
+        <div className="sidebar-top">
+          <p className="wordmark">Benson</p>
+          <button
+            className="record-button"
+            aria-pressed={recorder.recording}
+            disabled={busy || shortcut.changing}
+            onClick={toggleRecording}
+          >
+            <span className="record-dot" aria-hidden="true" />
+            {recorder.recording ? 'Stop' : 'Record'}
+          </button>
+          {recorder.recording && (
+            <div className="sidebar-status">
+              <Status>Recording...</Status>
+            </div>
           )}
-        </SelectedRecording>
-      )}
+        </div>
 
-      <HistoryList
-        items={history.items}
-        loading={history.loading}
-        error={history.error}
-        disabled={busy || recorder.recording}
-        selectedPath={savedPath}
-        onOpen={openRecording}
-        onRetry={history.reload}
-      />
-    </main>
+        <HistoryList
+          items={history.items}
+          loading={history.loading}
+          error={history.error}
+          disabled={busy || recorder.recording}
+          selectedPath={savedPath}
+          onOpen={openRecording}
+          onRetry={history.reload}
+        />
+
+        <div className="sidebar-footer">
+          <ShortcutSettings
+            state={shortcut.state}
+            buttonText={shortcut.buttonText}
+            disabled={busy || recorder.recording || shortcut.state.saving}
+            onChange={shortcut.change}
+          />
+        </div>
+      </aside>
+
+      <main className="content">
+        {busy && <Status>Working...</Status>}
+        {error && <Alert>{error}</Alert>}
+
+        {audioUrl || savedPath ? (
+          <SelectedRecording
+            createdAt={selected?.created_at ?? null}
+            audioUrl={audioUrl}
+            transcript={transcript}
+            busy={busy}
+            showPrepare={Boolean(selected?.transcript && !selected.sent_at && !draft)}
+            prepareLabel={qwenError ? 'Retry draft' : 'Prepare draft'}
+            prepareDisabled={busy || recorder.recording}
+            onPrepare={async () => {
+              setWorking(true)
+              setError(null)
+              setSentMessage('')
+              await prepareDraft(selected?.transcript ?? '')
+              setWorking(false)
+            }}
+          >
+            {sentMessage && <Status>{sentMessage}</Status>}
+            {selected?.sent_at && <p>This recording has been sent to Obsidian.</p>}
+            {qwenError && <Alert>{qwenError}</Alert>}
+            {draft && (
+              <DraftReview
+                draft={draft}
+                disabled={busy}
+                canSend={
+                  !busy &&
+                  Boolean(selected && !selected.sent_at) &&
+                  Boolean(draft.path.trim() && draft.content.trim())
+                }
+                onChange={setDraft}
+                onSend={sendDraft}
+                onCancel={() => {
+                  setDraft(null)
+                  setError(null)
+                  setSentMessage('Draft cancelled. Your recording is still saved.')
+                }}
+              />
+            )}
+          </SelectedRecording>
+        ) : (
+          !busy &&
+          !recorder.recording && (
+            <div className="empty">
+              <h2>Say something to Benson</h2>
+              <p>Press Record, or hold your shortcut from any app.</p>
+            </div>
+          )
+        )}
+      </main>
+    </div>
   )
 }
 
