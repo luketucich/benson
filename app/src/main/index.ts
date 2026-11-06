@@ -1,7 +1,8 @@
 import { app, powerMonitor } from 'electron'
 import { join } from 'path'
 import { mkdirSync } from 'fs'
-import { electronApp, optimizer } from '@electron-toolkit/utils'
+import { electronApp, is, optimizer } from '@electron-toolkit/utils'
+import appIcon from '../../build/icon.png?asset'
 import { closeDatabase, openDatabase } from './database'
 import { closeVault, connectToVault } from './obsidian'
 import { setDraftVault } from './noteWriter'
@@ -38,6 +39,10 @@ app.whenReady().then(() => {
   void startOllama()
 
   electronApp.setAppUserModelId('com.luketucich.benson')
+
+  // The built app gets its icon from build/icon.icns. In development the Dock
+  // would show Electron's icon instead.
+  if (is.dev) app.dock?.setIcon(appIcon)
 
   // Set up Electron's development shortcuts.
   app.on('browser-window-created', (_, window) => optimizer.watchWindowShortcuts(window))
