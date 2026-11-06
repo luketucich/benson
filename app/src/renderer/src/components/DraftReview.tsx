@@ -29,17 +29,17 @@ export function DraftReview({
 
       {/* The editable fields appear only when Qwen picked a note to write to. */}
       {clarify ? (
-        <p className="draft-explanation">Record again with more detail.</p>
+        <p className="draft-explanation">Record again and say a bit more about where it goes.</p>
       ) : (
         <>
-          <label htmlFor="note-path">Destination</label>
+          <label htmlFor="note-path">Save to</label>
           <input
             id="note-path"
             value={draft.path}
             disabled={disabled}
             onChange={(event) => onChange({ ...draft, path: event.target.value })}
           />
-          <label htmlFor="note-content">Note text</label>
+          <label htmlFor="note-content">Note</label>
           <textarea
             id="note-content"
             rows={6}
@@ -52,11 +52,11 @@ export function DraftReview({
 
       <div className="draft-actions">
         <button className="button-ghost" disabled={disabled} onClick={onCancel}>
-          Cancel
+          Discard
         </button>
         {!clarify && (
           <button className="button-primary" disabled={!canSend} onClick={onSend}>
-            Send
+            Save to Obsidian
           </button>
         )}
       </div>

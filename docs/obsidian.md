@@ -6,11 +6,11 @@ Benson uses [MCPVault](https://github.com/bitbonsai/mcpvault) to search and read
 
 1. Stop recording. Benson saves the audio and transcript, then asks Qwen for a draft.
 2. Check the action, destination, and text. Edit them if needed.
-3. Choose **Send** to save the note or **Cancel** to keep just the recording.
+3. Choose **Save to Obsidian** to save the note or **Discard** to keep just the recording.
 
-If a draft fails, select the recording in History and choose **Prepare draft** again. If Qwen asks a question, record again with more detail.
+If a draft fails, select the recording in History and choose **Write a note** again. If Qwen asks a question, record again with more detail.
 
-Drafts are not saved. Cancel, switching recordings, or quitting clears the preview. The audio and transcript stay in History.
+Drafts are not saved. Discard, switching recordings, or quitting clears the preview. The audio and transcript stay in History.
 
 ## How notes are written
 

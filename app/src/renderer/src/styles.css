@@ -15,6 +15,7 @@
   --glass: #d8eef5;
   --danger: #ff8a9e;
   --font: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 * {
@@ -55,6 +56,15 @@ button {
   border-radius: 8px;
   background: transparent;
   cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    opacity 0.15s,
+    transform 0.1s var(--ease);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 button:hover:not(:disabled) {
@@ -99,6 +109,12 @@ textarea {
   border-radius: 8px;
   background: var(--bg);
   resize: vertical;
+  transition: border-color 0.15s;
+}
+
+input:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: #3a3740;
 }
 
 label,
@@ -168,14 +184,14 @@ label,
   background: currentColor;
 }
 
-.record-button[aria-pressed='true'] .record-dot {
-  border-radius: 2px;
+.record-dot {
+  transition: border-radius 0.2s var(--ease);
 }
 
-.sidebar-status {
-  margin: 8px 4px 0;
-  color: var(--muted);
-  font-size: 12px;
+/* While recording, the dot turns into a stop square and breathes. */
+.record-button[aria-pressed='true'] .record-dot {
+  border-radius: 2px;
+  animation: breathe 1.2s ease-in-out infinite;
 }
 
 .history {
@@ -196,6 +212,11 @@ label,
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* New recordings slide into the list. */
+.history li {
+  animation: fade-up 0.3s var(--ease) both;
 }
 
 .history-item {
@@ -268,9 +289,41 @@ label,
   max-width: 640px;
 }
 
+/* Everything in the main column eases in when it appears. */
+.content > *,
+.selected > *,
+.draft {
+  animation: fade-up 0.35s var(--ease) both;
+}
+
 .content > [role='status'],
 .content > [role='alert'] {
   margin-bottom: 16px;
+}
+
+.content [role='alert'] {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgb(255 138 158 / 10%);
+}
+
+/* Shown after a short pause, so quick actions don't flash a spinner. */
+.working {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  animation-delay: 0.15s !important;
+}
+
+.spinner {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--line);
+  border-top-color: var(--gumball);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
 .empty {
@@ -285,8 +338,134 @@ label,
   font-weight: 600;
 }
 
-.empty p {
+.steps {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 18px 0 22px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fade-up 0.4s var(--ease) both;
+}
+
+.steps li:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.steps li:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.steps span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gumball-wash);
+  color: var(--gumball);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Recording: a red gumball with rings spreading out from it. */
+.recording-view {
+  margin-top: 16vh;
+  max-width: none;
+  text-align: center;
+}
+
+.pulse {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 22px;
+}
+
+.pulse span,
+.pulse::before,
+.pulse::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--machine-red);
+}
+
+.pulse::before,
+.pulse::after {
+  content: '';
+  animation: ripple 1.8s var(--ease) infinite;
+}
+
+.pulse::after {
+  animation-delay: 0.9s;
+}
+
+.pulse span {
+  z-index: 1;
+  animation: breathe 1.2s ease-in-out infinite;
+}
+
+.recording-view h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.timer {
+  margin: 2px 0 8px;
   color: var(--muted);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Saved to Obsidian */
+.sent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--gumball-wash);
+}
+
+.sent svg {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sent circle {
+  fill: var(--gumball);
+}
+
+.sent path {
+  stroke: var(--sidebar);
+  stroke-width: 2.4;
+}
+
+.sent .meta {
+  overflow-wrap: anywhere;
+}
+
+.just-sent {
+  animation: pop 0.45s var(--ease) both !important;
+}
+
+.just-sent path {
+  stroke-dasharray: 16;
+  stroke-dashoffset: 16;
+  animation: draw 0.35s 0.2s var(--ease) forwards;
 }
 
 .recording-title {
@@ -332,4 +511,62 @@ audio {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes breathe {
+  50% {
+    transform: scale(0.9);
+  }
+}
+
+@keyframes ripple {
+  from {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Respect Reduce Motion: keep fades short and drop movement. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .just-sent path {
+    stroke-dashoffset: 0;
+  }
 }

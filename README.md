@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Record a note and stop. Benson saves the audio, transcribes it, and Qwen drafts a note. Check the destination and text, edit if needed, then choose **Send** or **Cancel**. Nothing goes to Obsidian until you choose Send.
+Record a note and stop. Benson saves the audio, transcribes it, and Qwen drafts a note. Check where it goes and what it says, edit if needed, then choose **Save to Obsidian** or **Discard**. Nothing goes to Obsidian until you choose Save to Obsidian. A short sound plays when recording starts and stops, and when a note is saved.
 
 ## Recording shortcut
 
