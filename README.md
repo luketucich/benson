@@ -56,8 +56,8 @@ I meet with my professor on Thursdays and send a weekly update every Friday.
 | October 17-23          | Clean up the code, split it into smaller files, and simplify the screen.                                                                                 |
 | October 24-30          | Test the MVP with my own recordings and write it up. Then improve the main window, menu bar, history, loading screens, and error messages.               |
 | October 31-November 6  | Add small UI improvements, sounds, animations, and a simple mute option.                                                                                 |
-| November 7-13          | Ask 3 friends to try Benson and note what confuses them or does not work.                                                                                |
-| November 14-20         | Fix the biggest issues from testing and ask a few more people to try it if time allows.                                                                  |
-| November 21-27         | Finish the documentation and compare Benson with similar apps.                                                                                           |
-| November 28-December 4 | Build and practice the live demo and 30-minute presentation.                                                                                             |
+| November 7-13          | Finish onboarding, so a new person can set up Benson on their own.                                                                                       |
+| November 14-20         | Finish the dialog box and get Benson ready for testers.                                                                                                  |
+| November 21-27         | Thanksgiving. Have family and friends try Benson and note what confuses them or does not work.                                                           |
+| November 28-December 4 | Fix the biggest issues from testing, finish the documentation, and build and practice the live demo and 30-minute presentation.                         |
 | December 5-11          | Give the final presentation and finish any remaining class materials.                                                                                    |
