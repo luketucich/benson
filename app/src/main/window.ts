@@ -1,6 +1,8 @@
-import { BrowserWindow, shell } from 'electron'
-import { join } from 'path'
-import { is } from '@electron-toolkit/utils'
+import { app, BrowserWindow, shell } from 'electron'
+import { execFile } from 'child_process'
+import { resolve } from 'path'
+import { loadPage, preloadPath } from './page'
+import { closeFinishedPanel } from './panel'
 import { cancelShortcutCapture, captureShortcutInput } from './recordingShortcut'
 
 let mainWindow: BrowserWindow | null = null
@@ -15,11 +17,33 @@ export function hasWindows(): boolean {
   return BrowserWindow.getAllWindows().length > 0
 }
 
-export function showWindow(): void {
+export async function showWindow(): Promise<void> {
   if (!mainWindow || mainWindow.isDestroyed()) return
+  // Benson is in the Dock only while its window is open, like other menu bar apps.
+  // Wait for it to be back there, or macOS won't let it come to the front.
+  await app.dock?.show()
   if (mainWindow.isMinimized()) mainWindow.restore()
   mainWindow.show()
   mainWindow.focus()
+}
+
+// Puts Benson in front of the app you're using. macOS ignores an app that asks
+// to jump ahead on its own, so this asks the system to open Benson instead,
+// the same as clicking it in the Dock.
+export function bringToFront(): void {
+  const bundle = resolve(app.getPath('exe'), '../../..')
+  execFile(
+    'open',
+    [bundle],
+    (error) => error && console.error('Could not bring Benson forward.', error)
+  )
+}
+
+// Opens the window and puts Benson in front of the app you're using: for the
+// menu bar's Open Benson, the panel's Open button, and onboarding.
+export async function openWindow(): Promise<void> {
+  await showWindow()
+  bringToFront()
 }
 
 export function sendToWindow(channel: string, payload: unknown): void {
@@ -38,7 +62,7 @@ export function createWindow(): void {
     titleBarStyle: 'hiddenInset',
     backgroundColor: '#17161a',
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: preloadPath,
       backgroundThrottling: false,
       sandbox: false
     }
@@ -52,10 +76,12 @@ export function createWindow(): void {
     if (quitting) return
     event.preventDefault()
     window.hide()
+    app.dock?.hide()
     void cancelShortcutCapture()
   })
 
   window.on('blur', () => void cancelShortcutCapture())
+  window.on('focus', closeFinishedPanel)
   window.webContents.on('before-input-event', captureShortcutInput)
 
   window.webContents.setWindowOpenHandler((details) => {
@@ -63,10 +89,5 @@ export function createWindow(): void {
     return { action: 'deny' }
   })
 
-  // Use the development server while coding, or the built page otherwise.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    window.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    window.loadFile(join(__dirname, '../renderer/index.html'))
-  }
+  loadPage(window)
 }
