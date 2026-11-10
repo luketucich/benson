@@ -2,7 +2,7 @@ import { readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Input } from 'electron'
 import { unsetShortcut, type RecordingShortcut, type ShortcutState } from '../../shortcut'
-import { labelFor, validateShortcut } from './keys'
+import { labelFor, modifierLabel, validateShortcut } from './keys'
 import { killHelper, startHelper, stopHelper } from './helper'
 
 let shortcut: RecordingShortcut | null = null
@@ -87,7 +87,7 @@ export async function beginShortcutCapture(): Promise<void> {
 
 async function finishCapture(next: RecordingShortcut | null): Promise<void> {
   if (quitting || !state.listening) return
-  setState({ listening: false, saving: true, error: null })
+  setState({ listening: false, pressing: '', saving: true, error: null })
 
   try {
     if (next) {
@@ -116,6 +116,12 @@ async function finishCapture(next: RecordingShortcut | null): Promise<void> {
   }
 }
 
+// Sets a shortcut straight away, like onboarding's Control + Option + Space.
+export async function setShortcut(next: RecordingShortcut): Promise<void> {
+  if (!state.listening) await beginShortcutCapture()
+  await finishCapture(validateShortcut(next))
+}
+
 export function cancelShortcutCapture(): Promise<void> {
   return finishCapture(null)
 }
@@ -125,6 +131,10 @@ export function cancelShortcutCapture(): Promise<void> {
 export function captureShortcutInput(event: Electron.Event, input: Input): void {
   if (!state.listening) return
   event.preventDefault()
+
+  // Show the modifier keys as they're pressed and let go, before the real key.
+  const modifiers = modifierLabel(input)
+  if (modifiers !== state.pressing) setState({ pressing: modifiers })
 
   if (input.type !== 'keyDown' || input.isAutoRepeat) return
   if (input.key === 'Escape') {

@@ -51,10 +51,54 @@ const keyCodes: Record<string, number> = {
   F10: 109,
   F11: 103,
   F12: 111,
+  F13: 105,
+  F14: 107,
+  F15: 113,
+  F16: 106,
+  F17: 64,
+  F18: 79,
+  F19: 80,
+  F20: 90,
   ArrowLeft: 123,
   ArrowRight: 124,
   ArrowDown: 125,
-  ArrowUp: 126
+  ArrowUp: 126,
+  // The keypad. Browsers call the Mac's Clear key NumLock.
+  NumLock: 71,
+  NumpadDecimal: 65,
+  NumpadMultiply: 67,
+  NumpadAdd: 69,
+  NumpadDivide: 75,
+  NumpadEnter: 76,
+  NumpadSubtract: 78,
+  NumpadEqual: 81,
+  Numpad0: 82,
+  Numpad1: 83,
+  Numpad2: 84,
+  Numpad3: 85,
+  Numpad4: 86,
+  Numpad5: 87,
+  Numpad6: 88,
+  Numpad7: 89,
+  Numpad8: 91,
+  Numpad9: 92
+}
+
+// Keys that never type text, so they work as a shortcut on their own.
+function standsAlone(code: string): boolean {
+  return /^F\d+$/.test(code) || code === 'NumLock'
+}
+
+// Names people know, for keys whose browser names are unclear.
+const keyNames: Record<string, string> = {
+  NumLock: 'Clear',
+  NumpadDecimal: 'Keypad .',
+  NumpadMultiply: 'Keypad *',
+  NumpadAdd: 'Keypad +',
+  NumpadDivide: 'Keypad /',
+  NumpadEnter: 'Keypad Enter',
+  NumpadSubtract: 'Keypad -',
+  NumpadEqual: 'Keypad ='
 }
 
 export function keyCodeFor(code: string): number {
@@ -68,8 +112,8 @@ export function modifiersFor(key: RecordingShortcut): number {
   )
 }
 
-// A shortcut needs a key we know and, unless it is a function key, a modifier.
-// Otherwise it would fire while typing.
+// A shortcut needs a key we know and, unless the key never types text, a
+// modifier. Otherwise it would take that key away from typing.
 export function validateShortcut(value: unknown): RecordingShortcut {
   if (!value || typeof value !== 'object') throw new Error('Choose a recording shortcut.')
   const key = value as RecordingShortcut
@@ -77,22 +121,34 @@ export function validateShortcut(value: unknown): RecordingShortcut {
   if (
     !Object.hasOwn(keyCodes, key.code) ||
     ![key.control, key.alt, key.shift, key.meta].every((field) => typeof field === 'boolean') ||
-    (!key.control && !key.alt && !key.meta && !/^F\d+$/.test(key.code))
+    (!key.control && !key.alt && !key.meta && !standsAlone(key.code))
   ) {
-    throw new Error('Try a shortcut like Control + Option + Space.')
+    throw new Error(
+      'Add Control, Option, or Command, or use a function key or Clear. For example, Control + Option + Space.'
+    )
   }
 
   return { code: key.code, control: key.control, alt: key.alt, shift: key.shift, meta: key.meta }
 }
 
-export function labelFor(key: RecordingShortcut): string {
+// The modifier keys being held, like "Control + Option".
+export function modifierLabel(key: Omit<RecordingShortcut, 'code'>): string {
   return [
     key.control && 'Control',
     key.alt && 'Option',
     key.shift && 'Shift',
-    key.meta && 'Command',
-    key.code.replace(/^(Key|Digit)/, '').replace('Arrow', '')
+    key.meta && 'Command'
   ]
     .filter(Boolean)
     .join(' + ')
+}
+
+export function labelFor(key: RecordingShortcut): string {
+  const name =
+    keyNames[key.code] ??
+    key.code
+      .replace(/^(Key|Digit)/, '')
+      .replace('Arrow', '')
+      .replace(/^Numpad/, 'Keypad ')
+  return [modifierLabel(key), name].filter(Boolean).join(' + ')
 }
