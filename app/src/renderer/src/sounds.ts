@@ -1,3 +1,5 @@
+import { playThroughSpeaker } from './speaker'
+
 // Short sounds made in code, so there are no audio files to ship.
 let context: AudioContext | null = null
 
@@ -9,6 +11,7 @@ function play(notes: Note[], volume = 0.12): void {
   context ??= new AudioContext()
   const ctx = context
   if (ctx.state === 'suspended') void ctx.resume()
+  playThroughSpeaker(ctx)
 
   for (const [frequency, delay] of notes) {
     const start = ctx.currentTime + delay
