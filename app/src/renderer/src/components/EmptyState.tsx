@@ -1,3 +1,5 @@
+import { Keys } from './Keys'
+
 // First thing you see: what Benson does, in three steps.
 export function EmptyState({ shortcut }: { shortcut: string | null }): React.JSX.Element {
   return (
@@ -15,9 +17,13 @@ export function EmptyState({ shortcut }: { shortcut: string | null }): React.JSX
         </li>
       </ol>
       <p className="meta">
-        {shortcut
-          ? `Press Record, or hold ${shortcut} from any app.`
-          : 'Press Record, or set a shortcut below to record from any app.'}
+        {shortcut ? (
+          <>
+            Press Record, or hold <Keys label={shortcut} /> from any app.
+          </>
+        ) : (
+          'Press Record, or set a shortcut in Settings to record from any app.'
+        )}
       </p>
     </section>
   )

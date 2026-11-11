@@ -68,3 +68,8 @@ export function appendSeparator(note: string, content: string): string {
   const trailing = note.length - note.trimEnd().length
   return blankLine.slice(Math.min(trailing, blankLine.length))
 }
+
+// A note's name without its folder or .md, like "Groceries".
+export function noteName(path: string): string {
+  return (path.split('/').pop() ?? path).replace(/\.md$/, '')
+}
