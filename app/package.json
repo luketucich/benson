@@ -7,7 +7,7 @@
   "homepage": "https://github.com/luketucich/benson",
   "scripts": {
     "build:hotkey": "node scripts/build-hotkey.mjs",
-    "predev": "npm run build:hotkey",
+    "predev": "npm run build:hotkey && node scripts/name-dev-app.mjs",
     "prebuild": "npm run build:hotkey",
     "prebuild:mac": "npm run build:hotkey",
     "format": "prettier --write .",
@@ -15,6 +15,7 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "test": "node --test \"tests/*.test.ts\"",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
@@ -27,7 +28,8 @@
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
-    "@modelcontextprotocol/client": "2.0.0"
+    "@modelcontextprotocol/client": "2.0.0",
+    "lucide-react": "^0.468.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
