@@ -1,0 +1,166 @@
+/* Main column */
+.content {
+  overflow-y: auto;
+  /* Room for the scrollbar is always kept, so long and short threads line up
+     and nothing slides sideways when you switch between them. */
+  scrollbar-gutter: stable;
+  padding: clamp(24px, 5vh, 40px) clamp(20px, 5vw, 48px) 32px;
+}
+
+/* An open thread runs to the bottom edge, where its reply box is docked. */
+.content:has(.thread) {
+  padding-bottom: 0;
+}
+
+.content > * {
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+/* Everything in the main column eases in when it appears. */
+.content > * {
+  animation: fade-up 0.35s var(--ease) both;
+}
+
+/* A thread swaps in at once, like switching chats in Messages. Its new
+   messages ease in on their own. */
+.content > .thread {
+  animation: none;
+}
+
+.content > [role='status'] {
+  margin-bottom: 16px;
+}
+
+/* Shown after a short pause, so quick actions don't flash a spinner. */
+.working {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  animation-delay: 0.15s !important;
+}
+
+.spinner {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--line);
+  border-top-color: var(--gumball);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.empty {
+  margin-top: 18vh;
+  text-align: center;
+  max-width: none;
+}
+
+.empty h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.steps {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 18px 0 22px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fade-up 0.4s var(--ease) both;
+}
+
+.steps li:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.steps li:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.steps span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gumball-wash);
+  color: var(--gumball);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Recording: a red gumball with rings spreading out from it. */
+.recording-view {
+  margin-top: 16vh;
+  max-width: none;
+  text-align: center;
+}
+
+.pulse {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 22px;
+}
+
+.pulse span,
+.pulse::before,
+.pulse::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--machine-red);
+}
+
+.pulse::before,
+.pulse::after {
+  content: '';
+  animation: ripple 1.8s var(--ease) infinite;
+}
+
+.pulse::after {
+  animation-delay: 0.9s;
+}
+
+.pulse span {
+  z-index: 1;
+  animation: breathe 1.2s ease-in-out infinite;
+}
+
+.recording-view h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.timer {
+  margin: 2px 0 8px;
+  color: var(--muted);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The note card: where it goes, what it says, and Discard or Save. */
+.draft {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}

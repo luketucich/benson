@@ -1,0 +1,246 @@
+/* An open recording, shown as a text thread: your messages on the right,
+   Benson's on the left. */
+/* The thread fills the column, so the reply box can sit at the bottom. */
+.thread {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 100%;
+}
+
+.thread-time {
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.bubble {
+  max-width: min(78%, 480px);
+  padding: 9px 14px;
+  border-radius: 18px;
+  line-height: 1.4;
+  animation: fade-up 0.3s var(--ease) both;
+}
+
+/* Yours: pink, on the right, with the corner nearest you squared off a bit. */
+.bubble-you {
+  align-self: flex-end;
+  border-bottom-right-radius: 6px;
+  background: var(--gumball);
+  color: var(--you-text);
+}
+
+/* Benson's: gray, on the left. */
+.bubble-benson {
+  align-self: flex-start;
+  border-bottom-left-radius: 6px;
+  background: var(--bubble);
+}
+
+/* A new speaker gets a little more room above. */
+.bubble-you + .bubble-benson,
+.bubble-benson + .bubble-you {
+  margin-top: 8px;
+}
+
+.bubble-still {
+  animation: none;
+}
+
+.just-saved {
+  animation: pop 0.45s var(--ease) both;
+}
+
+/* The note Benson wrote, attached under its message. */
+.bubble-card {
+  width: min(100%, 520px);
+  max-width: none;
+  padding: 12px;
+}
+
+/* Benson is working on it: three dots, like someone typing. */
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 13px 14px;
+}
+
+.typing-dots span:not(.sr-only) {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: typing 1.2s ease-in-out infinite;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* Your recording, shown like a voice memo, with what you said under it. */
+.bubble-memo {
+  width: min(78%, 380px);
+  padding: 10px 12px 10px 10px;
+}
+
+.memo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.memo audio {
+  display: none;
+}
+
+.memo-play {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 16%);
+  color: var(--you-text);
+}
+
+.memo-play:hover:not(:disabled) {
+  background: rgb(0 0 0 / 24%);
+}
+
+.memo-icon {
+  display: grid;
+  animation: fade-in 0.15s ease-out;
+}
+
+/* The waveform. Bars already played are darker. A see-through slider sits on
+   top, so you can drag along it. */
+.memo-wave {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 2px;
+  height: 28px;
+}
+
+.memo-bar {
+  flex: 1;
+  min-height: 3px;
+  border-radius: 2px;
+  background: rgb(26 16 24 / 30%);
+  transition: background-color 0.15s;
+}
+
+.memo-bar.played {
+  background: var(--you-text);
+}
+
+.memo-wave input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.memo-wave input:disabled {
+  cursor: default;
+}
+
+.memo-time {
+  flex: none;
+  min-width: 30px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  opacity: 0.75;
+}
+
+.memo-transcript {
+  margin-top: 8px;
+  font-size: 14px;
+  cursor: text;
+  user-select: text;
+}
+
+.memo-missing {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+/* The reply box, docked at the bottom like iMessage. margin-top: auto pushes
+   it down in a short thread, and sticky keeps it there while a long one scrolls. */
+.composer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding: 16px 0 18px;
+  background: linear-gradient(to bottom, transparent, var(--bg) 16px);
+}
+
+.composer input {
+  flex: 1;
+  border-radius: 18px;
+  padding: 8px 14px;
+}
+
+.composer-button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--bubble);
+  color: var(--text-soft);
+  animation: fade-in 0.15s ease-out;
+}
+
+.composer-button:hover:not(:disabled) {
+  background: var(--line);
+  color: var(--text);
+}
+
+.composer-send,
+.composer-send:hover:not(:disabled) {
+  background: var(--gumball);
+  color: var(--you-text);
+}
+
+.composer-stop,
+.composer-stop:hover:not(:disabled) {
+  background: var(--machine-red);
+  color: #fff;
+}
+
+/* A small button inside one of Benson's bubbles, like Try again. */
+.bubble-action {
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-color: transparent;
+  /* Tinted pink so it reads as a button, not more of Benson's message. */
+  background: var(--gumball-wash);
+  color: var(--gumball-hover);
+  font-size: 13px;
+}
+
+.bubble-action:hover {
+  background: rgb(200 115 155 / 24%);
+}

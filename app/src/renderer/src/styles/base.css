@@ -1,0 +1,378 @@
+/* Colors are taken from Benson the gumball machine: pink gumballs, red body, glass, gray metal. */
+:root {
+  color-scheme: dark;
+  --bg: #17161a;
+  --sidebar: #111014;
+  --surface: #1f1d22;
+  --line: #2b2930;
+  /* Three levels of text: what you read, what supports it, and small print. */
+  --text: #f3eef4;
+  --text-soft: #c4bec9;
+  --muted: #8f8a96;
+  /* Message bubbles: Benson's gray, and the dark text on your pink ones. */
+  --bubble: #29262e;
+  --you-text: #1c1219;
+  --gumball: #c8739b;
+  --gumball-hover: #d68bae;
+  --gumball-wash: rgb(200 115 155 / 14%);
+  --machine-red: #d0023f;
+  --machine-red-hover: #e0154f;
+  --glass: #d8eef5;
+  --danger: #ff8a9e;
+  --font: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font:
+    14px/1.5 var(--font),
+    sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  /* Labels and buttons aren't text to select, so they keep the arrow cursor
+     like other Mac apps. Transcripts and notes stay selectable. */
+  cursor: default;
+  user-select: none;
+}
+
+.bubble-text,
+/* Registered so the scrollbar's color can fade (see .history). */
+@property --thumb {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+p {
+  margin: 0;
+}
+
+/* Buttons: quiet by default, filled only for the one main action. */
+button {
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background-color 0.18s,
+    border-color 0.18s,
+    color 0.18s,
+    opacity 0.18s,
+    outline-color 0.18s,
+    outline-offset 0.18s var(--ease),
+    transform 0.12s var(--ease);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+button:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* A button with an icon and words keeps them side by side. :where keeps this
+   weak, so buttons with their own layout aren't changed. */
+:where(button:has(> .icon)) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Small buttons get a smaller icon to match their text. */
+.bubble-action .icon,
+.panel-bar .button-ghost .icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* The focus ring grows out from the control instead of popping on. */
+button,
+input,
+textarea,
+select {
+  outline: 2px solid transparent;
+  outline-offset: 0;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline-color: var(--glass);
+  outline-offset: 2px;
+}
+
+.button-primary {
+  border-color: transparent;
+  background: var(--gumball);
+  color: var(--sidebar);
+  font-weight: 500;
+}
+
+.button-primary:hover:not(:disabled) {
+  background: var(--gumball-hover);
+}
+
+.button-ghost {
+  border-color: transparent;
+  color: var(--muted);
+}
+
+/* Every field looks the same: text boxes, dropdowns, and the boxes that just
+   show a value (.field, see FieldRow). Spacing between them comes from
+   whatever holds them. */
+input,
+textarea,
+select,
+.field {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  cursor: text;
+  user-select: text;
+  transition:
+    border-color 0.18s,
+    background-color 0.18s,
+    outline-color 0.18s,
+    outline-offset 0.18s var(--ease);
+}
+
+input:focus,
+textarea:focus {
+  border-color: #47434d;
+  background: #141317;
+}
+
+input:hover:not(:disabled),
+textarea:hover:not(:disabled),
+select:hover:not(:disabled) {
+  border-color: #3a3740;
+}
+
+/* Icons come from Lucide (see components/icons.tsx) and take the text color.
+   Next to a word, they sit on the middle of the text. */
+.icon {
+  flex: none;
+  vertical-align: -3px;
+}
+
+/* Small icon buttons, like the "..." menu and the panel's close button. */
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+}
+
+.icon-button:hover:not(:disabled) {
+  background: var(--line);
+  color: var(--text);
+}
+
+label,
+.meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Small headings that name a section: "Today" in the sidebar, and the
+   settings headings. */
+.history h2,
+.setting h3 {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+[role='alert'] {
+  color: var(--danger);
+}
+
+/* Layout */
+.app {
+  display: grid;
+  grid-template-columns: clamp(208px, 26vw, 280px) minmax(0, 1fr);
+  height: 100%;
+}
+
+/* Slim scrollbars that fade in while the pointer is over the sidebar or the
+   main column, like macOS, and darken on the bar itself. The color fades
+   through --thumb, since scrollbars can't be animated directly. */
+.history,
+.content {
+  transition: --thumb 0.3s;
+}
+
+.sidebar:hover .history,
+.content:hover {
+  --thumb: rgb(155 150 161 / 40%);
+}
+
+.history::-webkit-scrollbar,
+.content::-webkit-scrollbar {
+  width: 14px;
+}
+
+.history::-webkit-scrollbar-thumb,
+.content::-webkit-scrollbar-thumb {
+  min-height: 40px;
+  border: 4px solid transparent;
+  border-radius: 14px;
+  background-color: var(--thumb);
+  background-clip: padding-box;
+}
+
+.history::-webkit-scrollbar-thumb:hover,
+.content::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(155 150 161 / 70%);
+}
+
+/* Dropdowns look like the text fields, with a small arrow, and act like buttons. */
+select {
+  margin: 0;
+  padding-right: 28px;
+  cursor: pointer;
+  user-select: none;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    right 14px center,
+    right 10px center;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+}
+
+/* Only the note's text can be made taller. */
+textarea {
+  resize: vertical;
+}
+
+/* A box that shows a value you don't type, like the vault's name. */
+.field {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: default;
+  user-select: none;
+}
+
+/* A field with its button beside it, like Save to with Choose File.... */
+.field-row {
+  display: flex;
+  gap: 8px;
+}
+
+.field-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.field-row > button {
+  flex: none;
+}
+
+/* Text for screen readers only. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* A quiet prompt inside a field, like "Press keys". */
+.field-hint {
+  color: var(--muted);
+}
+
+/* Toasts: small messages that drop in at the top of the window and fade away.
+   Click one to dismiss it. */
+.toasts {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
+  color: var(--text);
+  font-size: 13px;
+  text-align: left;
+  pointer-events: auto;
+  animation: toast-in 0.25s var(--ease) both;
+}
+
+.toast:hover:not(:disabled) {
+  background: var(--bubble);
+}
+
+.toast-success .icon {
+  color: var(--gumball);
+}
+
+.toast-info .icon {
+  color: var(--glass);
+}
+
+.toast-error .icon {
+  color: var(--danger);
+}
+
+.toast-leave {
+  animation: toast-out 0.2s ease-in forwards;
+}
