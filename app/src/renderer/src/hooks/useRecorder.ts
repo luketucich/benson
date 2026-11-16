@@ -1,23 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
+import { openMic, stopMic } from '../mic'
 import { useEventCallback } from './useEventCallback'
 
 interface Options {
-  onClip: (blob: Blob, fromShortcut: boolean) => void
-  onError: (message: string, fromShortcut: boolean) => void
-}
-
-function stopMic(stream: MediaStream): void {
-  stream.getTracks().forEach((track) => track.stop())
+  // The microphone picked in settings. Empty means the Mac's default.
+  micId: string
+  // The finished recording, and how long it ran in seconds.
+  onClip: (blob: Blob, seconds: number) => void
+  onError: (message: string) => void
 }
 
 // Owns the microphone and the recorder. It does not decide when recording is
 // allowed; the screen checks that before calling start.
-export function useRecorder({ onClip, onError }: Options): {
+export function useRecorder({ micId, onClip, onError }: Options): {
   recording: boolean
   busy: boolean
   start: (fromShortcut?: boolean) => Promise<void>
   stop: () => void
-  toggle: () => void
   setHeld: (down: boolean) => void
   startedByShortcut: () => boolean
 } {
@@ -30,6 +29,7 @@ export function useRecorder({ onClip, onError }: Options): {
   const heldRef = useRef(false)
   const fromShortcutRef = useRef(false)
   const stopRequestedRef = useRef(false)
+  const startedAtRef = useRef(0)
 
   const clip = useEventCallback(onClip)
   const fail = useEventCallback(onError)
@@ -63,8 +63,9 @@ export function useRecorder({ onClip, onError }: Options): {
 
     let mic: MediaStream | null = null
     try {
-      // Mac asks for microphone permission the first time.
-      mic = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // Mac asks for microphone permission the first time. If the chosen
+      // microphone is unplugged, the browser falls back to the default one.
+      mic = await openMic(micId)
 
       // The key may be released while the permission window is open.
       if (stopRequestedRef.current || (fromShortcut && !heldRef.current)) {
@@ -84,30 +85,29 @@ export function useRecorder({ onClip, onError }: Options): {
         stopMic(recorder.stream)
         recorderRef.current = null
         if (broke) return
-        const wasShortcut = fromShortcutRef.current
         fromShortcutRef.current = false
         setBusy(false)
-        clip(new Blob(chunks, { type: 'audio/webm' }), wasShortcut)
+        const seconds = (performance.now() - startedAtRef.current) / 1000
+        clip(new Blob(chunks, { type: 'audio/webm' }), seconds)
       }
 
       recorder.onerror = () => {
         broke = true
-        const wasShortcut = fromShortcutRef.current
         stopMic(recorder.stream)
         reset()
-        fail('Microphone stopped. Try recording again.', wasShortcut)
+        fail('Microphone stopped. Try recording again.')
       }
 
       recorder.start()
+      startedAtRef.current = performance.now()
       recorderRef.current = recorder
       setRecording(true)
       setBusy(false)
       window.api.setRecordingActivity('recording')
     } catch (error) {
       if (mic) stopMic(mic)
-      const wasShortcut = fromShortcutRef.current
       reset()
-      fail(`Could not start recording: ${String(error)}`, wasShortcut)
+      fail(`Could not start recording: ${String(error)}`)
     } finally {
       startingRef.current = false
     }
@@ -128,7 +128,6 @@ export function useRecorder({ onClip, onError }: Options): {
     busy,
     start,
     stop,
-    toggle: () => (recording ? stop() : void start()),
     setHeld: (down) => {
       heldRef.current = down
     },
