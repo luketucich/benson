@@ -1,6 +1,6 @@
 import { Menu, Tray, nativeImage } from 'electron'
 import trayIcon from '../../resources/trayTemplate.png?asset'
-import { showWindow } from './window'
+import { openWindow } from './window'
 import type { RecordingActivity } from '../shortcut'
 
 // Kept at module scope so the tray is not garbage collected.
@@ -11,11 +11,11 @@ export function createTray(): void {
   tray.setToolTip('Benson')
 
   const menu = Menu.buildFromTemplate([
-    { label: 'Open Benson', click: showWindow },
+    { label: 'Open Benson', click: () => void openWindow() },
     { label: 'Quit Benson', role: 'quit' }
   ])
-  tray.on('click', showWindow)
-  tray.on('right-click', () => tray?.popUpContextMenu(menu))
+  // A left click opens this menu. A right click does nothing.
+  tray.on('click', () => tray?.popUpContextMenu(menu))
 }
 
 // Shows what Benson is doing next to the menu bar icon.
