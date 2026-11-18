@@ -1,11 +1,11 @@
 import { app, powerMonitor } from 'electron'
 import { join } from 'path'
 import { mkdirSync } from 'fs'
+import { homedir } from 'os'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import appIcon from '../../build/icon.png?asset'
-import { closeDatabase, openDatabase } from './database'
-import { closeVault, connectToVault } from './obsidian'
-import { setDraftVault } from './noteWriter'
+import { closeDatabase, hasRecordings, openDatabase } from './database'
+import { closeVault } from './obsidian'
 import { startOllama, stopOllama } from './ollama'
 import {
   closeRecordingShortcut,
@@ -13,29 +13,37 @@ import {
   setupRecordingShortcut
 } from './recordingShortcut'
 import { registerHandlers } from './ipc'
+import { getSettings, markSetUpIfAlreadyUsed } from './settings'
+import { toolsBin } from './setup/paths'
+import { openVault } from './vault'
+import { createPanel } from './panel'
 import { createTray } from './tray'
 import { createWindow, hasWindows, markQuitting, sendToWindow, showWindow } from './window'
 
-// For now, Benson uses one vault in Documents.
-function connectVault(): void {
-  const vaultPath = join(app.getPath('documents'), 'Benson Vault')
-  mkdirSync(vaultPath, { recursive: true })
-  const mcpVault = join(app.getAppPath(), 'node_modules/@bitbonsai/mcpvault/dist/server.js')
-
-  connectToVault(vaultPath, mcpVault)
-    .then(() => {
-      setDraftVault(vaultPath)
-      console.log(`Connected to the Obsidian vault at ${vaultPath}`)
-    })
-    .catch((error) => console.error('Could not connect to the Obsidian vault:', error))
-}
+// Apps opened from Finder get a bare PATH, so add the folders where uv,
+// FFmpeg and Ollama are usually installed.
+// Benson's own downloads come first (see setup/paths.ts).
+process.env.PATH = [
+  toolsBin(),
+  join(homedir(), '.local/bin'),
+  '/opt/homebrew/bin',
+  '/usr/local/bin',
+  process.env.PATH
+].join(':')
 
 // Set up storage and requests before opening the window.
 app.whenReady().then(() => {
   const dataFolder = app.getPath('userData')
   mkdirSync(dataFolder, { recursive: true })
   openDatabase(join(dataFolder, 'benson.sqlite'))
-  connectVault()
+  markSetUpIfAlreadyUsed(hasRecordings)
+  // A new copy of Benson waits for onboarding's vault step, so no folder is
+  // made before you choose one.
+  if (getSettings().setupDone) {
+    openVault(getSettings().vaultPath).catch((error) =>
+      console.error('Could not connect to the Obsidian vault:', error)
+    )
+  }
   void startOllama()
 
   electronApp.setAppUserModelId('com.luketucich.benson')
@@ -50,6 +58,7 @@ app.whenReady().then(() => {
   registerHandlers()
   createTray()
   createWindow()
+  createPanel()
 
   void setupRecordingShortcut(
     dataFolder,
@@ -62,7 +71,7 @@ app.whenReady().then(() => {
   powerMonitor.on('lock-screen', releaseRecordingShortcut)
 
   // Reopen the window when the Dock icon is clicked.
-  app.on('activate', () => (hasWindows() ? showWindow() : createWindow()))
+  app.on('activate', () => (hasWindows() ? void showWindow() : createWindow()))
 })
 
 app.on('before-quit', markQuitting)

@@ -11,6 +11,10 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+# The speech-to-text script lives outside the app folder, so copy it in.
+extraResources:
+  - from: ../scripts/transcribe.py
+    to: scripts/transcribe.py
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
