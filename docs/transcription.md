@@ -4,7 +4,7 @@ Benson runs each recording through Parakeet v2 on the Mac. Nothing leaves the co
 
 ## Setup
 
-You need an Apple Silicon Mac with [uv](https://docs.astral.sh/uv/getting-started/installation/) and FFmpeg.
+You need an Apple Silicon Mac. Benson's setup downloads [uv](https://docs.astral.sh/uv/) and FFmpeg into its own folder if they aren't installed, then runs the script once with `--prepare`, which downloads the model without transcribing anything. To run the script yourself, install them with:
 
 ```sh
 brew install uv ffmpeg

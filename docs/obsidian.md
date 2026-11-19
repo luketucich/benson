@@ -1,16 +1,24 @@
 # Obsidian
 
-Benson uses [MCPVault](https://github.com/bitbonsai/mcpvault) to search and read notes in `~/Documents/Benson Vault`. It starts and stops with Benson. Obsidian does not need to be open. To see the notes, choose **Open folder as vault** in Obsidian and pick that folder.
+Benson uses [MCPVault](https://github.com/bitbonsai/mcpvault) to search and read notes in the vault you choose during setup: **Make a vault for me** creates `~/Documents/Benson Vault`, and **Use my vault** picks an existing one. You can change it later under **Obsidian vault** in settings (the gear at the bottom left). It starts and stops with Benson. Obsidian does not need to be open. To see the notes, choose **Open folder as vault** in Obsidian and pick that folder.
 
 ## Review and send
 
+Each recording opens as a conversation: what you said, with a player for the audio, then Benson's reply.
+
 1. Stop recording. Benson saves the audio and transcript, then asks Qwen for a draft.
-2. Check the action, destination, and text. Edit them if needed.
-3. Choose **Save to Obsidian** to save the note or **Discard** to keep just the recording.
+2. Check the destination and text. **Choose File...** offers **Add to a Note...**, which opens the Mac's file picker in your vault, or **New Note...**, which lets you name a new one.
+3. Choose **Save to Obsidian** (or press ⌘↩) to save the note, or **Discard** to keep just the recording.
 
-If a draft fails, select the recording in History and choose **Write a note** again. If Qwen asks a question, record again with more detail.
+If Benson asks a question, answer in the reply box at the bottom by typing or with the mic, or hold your shortcut while the question is on screen. Benson tries again with your answer, and both stay in the conversation.
 
-Drafts are not saved. Discard, switching recordings, or quitting clears the preview. The audio and transcript stay in History.
+While Benson is working, the mic button becomes **Stop**. Press it, or your shortcut, to stop Benson, and choose **Continue** later to pick up where it left off.
+
+Recordings made with the shortcut show the same reply in a small panel at the bottom of the screen, with the same buttons. **Open** shows it in the main window, and Esc closes the panel and leaves the reply there for later.
+
+Replies are kept with the recording, so a draft is still there after switching recordings or quitting. If Benson couldn't answer, choose **Continue**. After discarding a draft, reply in the box to ask for another.
+
+To remove a recording, hover over it in History and choose **...**, then **Delete Recording**, or right-click it. Its audio, and any spoken answers, go to the Trash.
 
 ## How notes are written
 
